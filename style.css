@@ -1,0 +1,98 @@
+:root {
+    --bg-dark: #121212;
+    --card-bg: #1e1e1e;
+    --red-alert: #ff4b2b;
+    --green-safe: #00c853;
+    --text-main: #e0e0e0;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.container {
+    text-align: center;
+    width: 90%;
+    max-width: 500px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.online { background: #2e7d32; color: white; }
+
+.status-card {
+    background: var(--card-bg);
+    padding: 50px 20px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    margin-bottom: 30px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+#system-text {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+/* Alarm Active State */
+body.alarm-active {
+    animation: flash-bg 0.5s infinite;
+}
+
+.alarm-active .status-card {
+    background: #000;
+    border-color: var(--red-alert);
+    transform: scale(1.05);
+}
+
+@keyframes flash-bg {
+    0% { background-color: #121212; }
+    50% { background-color: #4a0000; }
+    100% { background-color: #121212; }
+}
+
+.controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn {
+    padding: 20px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.btn:active { transform: scale(0.98); }
+
+.btn-danger {
+    background: var(--red-alert);
+    color: white;
+    box-shadow: 0 5px 15px rgba(255, 75, 43, 0.4);
+}
+
+.btn-secondary {
+    background: #424242;
+    color: white;
+}

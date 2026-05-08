@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realtime Alarm System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-mode">
+    <div class="container">
+        <header>
+            <div id="connection-status" class="status-badge online">ONLINE</div>
+            <h1>Security Dashboard</h1>
+        </header>
+
+        <main>
+            <div id="alarm-box" class="status-card">
+                <p id="system-text">SYSTEM SAFE</p>
+                <div class="visualizer"></div>
+            </div>
+
+            <div class="controls">
+                <button id="trigger-btn" class="btn btn-danger">TRIGGER ALARM</button>
+                <button id="stop-btn" class="btn btn-secondary">STOP ALARM</button>
+            </div>
+        </main>
+
+        <footer>
+            <p>Connected to Firebase Realtime Database</p>
+        </footer>
+    </div>
+
+    <!-- Audio Element -->
+    <audio id="alarm-sound" src="alarm.mp3" loop></audio>
+
+    <!-- Firebase SDK (Modular) -->
+    <script type="module" src="script.js"></script>
+</body>
+</html>
