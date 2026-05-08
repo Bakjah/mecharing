@@ -3,23 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Client - Realtime Caller</title>
+    <title>Client Page</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="dark-mode">
+    <!-- Overlay Panggilan -->
     <div id="alarm-overlay" class="overlay hidden">
         <div class="overlay-content">
             <h1 class="blink">EMERGENCY CALL!</h1>
             <p>Anda sedang dipanggil oleh Operator</p>
-            <button id="stop-alarm-btn" class="btn btn-white">STOP ALARM</button>
+            <button id="stop-alarm-btn" class="btn-stop">STOP ALARM</button>
         </div>
     </div>
 
     <div class="container" id="login-section">
         <div class="card">
-            <h2>Daftar User</h2>
-            <input type="text" id="username-input" placeholder="Masukkan Nama Anda..." maxlength="15">
-            <button id="login-btn" class="btn btn-primary">Masuk System</button>
+            <h2>Pilih Identitas Anda</h2>
+            <select id="user-select" class="custom-select">
+                <option value="user1">Admin Ruang 1</option>
+                <option value="user2">Admin Ruang 2</option>
+                <option value="user3">Staff Teknik</option>
+                <option value="user4">Security</option>
+                <option value="user5">Manager</option>
+            </select>
+            <button id="login-btn" class="btn btn-primary">AKTIFKAN STATUS</button>
         </div>
     </div>
 
@@ -27,12 +34,12 @@
         <div class="card">
             <div class="status-badge online">ONLINE</div>
             <h2 id="display-username">Nama User</h2>
-            <p>Menunggu panggilan dari operator...</p>
-            <button id="logout-btn" class="btn btn-secondary">Logout</button>
+            <p>Menunggu panggilan...</p>
+            <button id="logout-btn" class="btn btn-secondary">LOGOUT / OFFLINE</button>
         </div>
     </div>
 
-    <audio id="alarm-sound" src="alarm.mp3" loop></audio>
+    <audio id="alarm-sound" src="alarm.mp3" preload="auto" loop></audio>
     <script type="module" src="script.js"></script>
 </body>
 </html>

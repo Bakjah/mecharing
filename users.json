@@ -1,0 +1,29 @@
+{
+  "users": {
+    "user1": {
+      "isCalling": false,
+      "status": "offline",
+      "username": "Admin Ruang 1"
+    },
+    "user2": {
+      "isCalling": false,
+      "status": "offline",
+      "username": "Admin Ruang 2"
+    },
+    "user3": {
+      "isCalling": false,
+      "status": "offline",
+      "username": "Staff Teknik"
+    },
+    "user4": {
+      "isCalling": false,
+      "status": "offline",
+      "username": "Security"
+    },
+    "user5": {
+      "isCalling": false,
+      "status": "offline",
+      "username": "Manager"
+    }
+  }
+}
