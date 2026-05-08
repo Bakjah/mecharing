@@ -6,19 +6,18 @@
     <title>Client Page</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="dark-mode">
-    <!-- Overlay Panggilan -->
+<body>
     <div id="alarm-overlay" class="overlay hidden">
         <div class="overlay-content">
             <h1 class="blink">EMERGENCY CALL!</h1>
-            <p>Anda sedang dipanggil oleh Operator</p>
+            <p>Operator sedang memanggil Anda...</p>
             <button id="stop-alarm-btn" class="btn-stop">STOP ALARM</button>
         </div>
     </div>
 
     <div class="container" id="login-section">
         <div class="card">
-            <h2>Pilih Identitas Anda</h2>
+            <h2>Pilih Identitas</h2>
             <select id="user-select" class="custom-select">
                 <option value="user1">Admin Ruang 1</option>
                 <option value="user2">Admin Ruang 2</option>
@@ -34,12 +33,13 @@
         <div class="card">
             <div class="status-badge online">ONLINE</div>
             <h2 id="display-username">Nama User</h2>
-            <p>Menunggu panggilan...</p>
-            <button id="logout-btn" class="btn btn-secondary">LOGOUT / OFFLINE</button>
+            <p>Siap menerima panggilan...</p>
+            <button id="logout-btn" class="btn btn-secondary">OFFLINE / KELUAR</button>
         </div>
     </div>
 
     <audio id="alarm-sound" src="alarm.mp3" preload="auto" loop></audio>
+    
     <script type="module" src="script.js"></script>
 </body>
 </html>
