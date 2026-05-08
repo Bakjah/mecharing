@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client - Realtime Caller</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-mode">
+    <div id="alarm-overlay" class="overlay hidden">
+        <div class="overlay-content">
+            <h1 class="blink">EMERGENCY CALL!</h1>
+            <p>Anda sedang dipanggil oleh Operator</p>
+            <button id="stop-alarm-btn" class="btn btn-white">STOP ALARM</button>
+        </div>
+    </div>
+
+    <div class="container" id="login-section">
+        <div class="card">
+            <h2>Daftar User</h2>
+            <input type="text" id="username-input" placeholder="Masukkan Nama Anda..." maxlength="15">
+            <button id="login-btn" class="btn btn-primary">Masuk System</button>
+        </div>
+    </div>
+
+    <div class="container hidden" id="status-section">
+        <div class="card">
+            <div class="status-badge online">ONLINE</div>
+            <h2 id="display-username">Nama User</h2>
+            <p>Menunggu panggilan dari operator...</p>
+            <button id="logout-btn" class="btn btn-secondary">Logout</button>
+        </div>
+    </div>
+
+    <audio id="alarm-sound" src="alarm.mp3" loop></audio>
+    <script type="module" src="script.js"></script>
+</body>
+</html>

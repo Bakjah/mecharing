@@ -1,85 +1,100 @@
-// Import Firebase SDK
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, set, onValue, push, onDisconnect, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// KONFIGURASI FIREBASE ANDA (Ganti dengan milik Anda dari Firebase Console)
+// 1. PASTE FIREBASE CONFIG ANDA DI SINI
 const firebaseConfig = {
     apiKey: "AIzaSy...",
-    authDomain: "your-project.firebaseapp.com",
-    databaseURL: "https://your-project.firebaseio.com",
-    projectId: "your-project",
-    storageBucket: "your-project.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef"
+    authDomain: "project-anda.firebaseapp.com",
+    databaseURL: "https://project-anda.firebaseio.com",
+    projectId: "project-anda",
+    storageBucket: "project-anda.appspot.com",
+    messagingSenderId: "0000000000",
+    appId: "1:0000000:web:000000"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const alarmRef = ref(db, 'alarmSystem/status');
 
-// Elements
-const body = document.body;
-const systemText = document.getElementById('system-text');
-const triggerBtn = document.getElementById('trigger-btn');
-const stopBtn = document.getElementById('stop-btn');
-const alarmSound = document.getElementById('alarm-sound');
+// Menentukan Halaman
+const isOperator = document.title.includes("Operator");
 
-let titleInterval = null;
+// --- LOGIKA OPERATOR (index.html) ---
+if (isOperator) {
+    const userListDiv = document.getElementById('user-list');
 
-// Meminta izin notifikasi browser
-if (Notification.permission !== "granted") {
-    Notification.requestPermission();
-}
+    onValue(ref(db, 'users'), (snapshot) => {
+        userListDiv.innerHTML = "";
+        const data = snapshot.val();
+        if (!data) {
+            userListDiv.innerHTML = "<p>Tidak ada user online.</p>";
+            return;
+        }
 
-// FUNGSI UNTUK MENGUBAH STATUS DI DATABASE
-const updateAlarmStatus = (isActive) => {
-    set(alarmRef, {
-        active: isActive,
-        timestamp: Date.now()
+        Object.keys(data).forEach(key => {
+            const user = data[key];
+            const card = document.createElement('div');
+            card.className = 'user-card';
+            card.innerHTML = `
+                <h3>${user.username}</h3>
+                <button class="btn btn-danger call-btn" data-id="${key}">CALL USER</button>
+            `;
+            userListDiv.appendChild(card);
+
+            card.querySelector('.call-btn').onclick = () => {
+                update(ref(db, `users/${key}`), { isCalling: true });
+            };
+        });
     });
-};
-
-// MENDENGARKAN PERUBAHAN REALTIME DARI FIREBASE
-onValue(alarmRef, (snapshot) => {
-    const data = snapshot.val();
-    if (data && data.active === true) {
-        startLocalAlarm();
-    } else {
-        stopLocalAlarm();
-    }
-});
-
-function startLocalAlarm() {
-    body.classList.add('alarm-active');
-    systemText.innerText = "ALARM ACTIVE!";
-    alarmSound.play().catch(e => console.log("User interaction required for audio"));
-    
-    // Notifikasi Browser
-    if (Notification.permission === "granted") {
-        new Notification("⚠️ SECURITY ALERT!", { body: "Alarm has been triggered!" });
-    }
-
-    // Tab Berkedip
-    if (!titleInterval) {
-        titleInterval = setInterval(() => {
-            document.title = document.title === "!!! ALARM !!!" ? "Realtime Alarm" : "!!! ALARM !!!";
-        }, 500);
-    }
 }
 
-function stopLocalAlarm() {
-    body.classList.remove('alarm-active');
-    systemText.innerText = "SAFE";
-    alarmSound.pause();
-    alarmSound.currentTime = 0;
+// --- LOGIKA CLIENT (page.html) ---
+else {
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const stopBtn = document.getElementById('stop-alarm-btn');
+    const usernameInput = document.getElementById('username-input');
+    const overlay = document.getElementById('alarm-overlay');
+    const audio = document.getElementById('alarm-sound');
     
-    // Hentikan tab berkedip
-    clearInterval(titleInterval);
-    titleInterval = null;
-    document.title = "Realtime Alarm System";
-}
+    let userKey = null;
 
-// Event Listeners
-triggerBtn.addEventListener('click', () => updateAlarmStatus(true));
-stopBtn.addEventListener('click', () => updateAlarmStatus(false));
+    loginBtn.onclick = () => {
+        const name = usernameInput.value.trim();
+        if (!name) return alert("Masukkan nama!");
+
+        const newUserRef = push(ref(db, 'users'));
+        userKey = newUserRef.key;
+
+        const userData = { username: name, isCalling: false };
+        set(newUserRef, userData);
+
+        // Auto Logout saat tutup tab
+        onDisconnect(newUserRef).remove();
+
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('status-section').classList.remove('hidden');
+        document.getElementById('display-username').innerText = name;
+
+        // Listen Panggilan
+        onValue(newUserRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.isCalling) {
+                overlay.classList.remove('hidden');
+                audio.play();
+                document.title = "!!! DIPANGGIL !!!";
+            }
+        });
+    };
+
+    stopBtn.onclick = () => {
+        overlay.classList.add('hidden');
+        audio.pause();
+        audio.currentTime = 0;
+        document.title = "Client - Realtime Caller";
+        update(ref(db, `users/${userKey}`), { isCalling: false });
+    };
+
+    logoutBtn.onclick = () => {
+        remove(ref(db, `users/${userKey}`)).then(() => location.reload());
+    };
+}
