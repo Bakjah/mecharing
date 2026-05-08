@@ -13,13 +13,10 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-
 const isOperator = document.title.includes("Operator");
 
 if (isOperator) {
-    // --- LOGIKA HALAMAN OPERATOR (INDEX) ---
     const userListDiv = document.getElementById('user-list');
-
     onValue(ref(db, 'users'), (snapshot) => {
         userListDiv.innerHTML = "";
         const data = snapshot.val();
@@ -29,30 +26,27 @@ if (isOperator) {
             card.className = `user-card ${user.status}`;
             card.innerHTML = `
                 <h3>${user.username}</h3>
-                <p>${user.status.toUpperCase()}</p>
+                <p>Status: <strong>${user.status.toUpperCase()}</strong></p>
                 ${user.status === 'online' ? `<button class="btn btn-danger" onclick="window.makeCall('${id}')">CALL</button>` : ''}
+                ${user.status === 'otw' ? `<span class="status-otw-text">🏃 Sedang Menuju Lokasi</span>` : ''}
             `;
             userListDiv.appendChild(card);
         }
     });
-
-    window.makeCall = (id) => {
-        update(ref(db, `users/${id}`), { isCalling: true });
-    };
+    window.makeCall = (id) => update(ref(db, `users/${id}`), { isCalling: true });
 
 } else {
-    // --- LOGIKA HALAMAN CLIENT (PAGE) ---
     const loginBtn = document.getElementById('login-btn');
     const userSelect = document.getElementById('user-select');
     const overlay = document.getElementById('alarm-overlay');
     const audio = document.getElementById('alarm-sound');
+    const otwBtn = document.getElementById('otw-btn');
     const stopBtn = document.getElementById('stop-alarm-btn');
 
     loginBtn.onclick = () => {
         const id = userSelect.value;
         const userRef = ref(db, `users/${id}`);
-
-        // Set Online
+        
         update(userRef, { status: "online", isCalling: false });
         onDisconnect(userRef).update({ status: "offline", isCalling: false });
 
@@ -60,25 +54,31 @@ if (isOperator) {
         document.getElementById('status-section').classList.remove('hidden');
         document.getElementById('display-username').innerText = userSelect.options[userSelect.selectedIndex].text;
 
-        // Pantau Panggilan
         onValue(userRef, (snap) => {
-            if (snap.val()?.isCalling === true) {
+            const data = snap.val();
+            if (data?.isCalling === true) {
                 overlay.classList.remove('hidden');
-                audio.play().catch(() => console.log("Klik layar untuk suara"));
+                audio.play().catch(() => {});
             } else {
                 overlay.classList.add('hidden');
                 audio.pause();
                 audio.currentTime = 0;
             }
+            
+            // Update UI status di halaman client sendiri
+            const indicator = document.getElementById('status-indicator');
+            indicator.className = `status-badge ${data.status}`;
+            indicator.innerText = data.status.toUpperCase();
         });
     };
 
-    stopBtn.onclick = () => {
-        const id = userSelect.value;
-        update(ref(db, `users/${id}`), { isCalling: false });
+    otwBtn.onclick = () => {
+        update(ref(db, `users/${userSelect.value}`), { status: "otw", isCalling: false });
     };
 
-    document.getElementById('logout-btn').onclick = () => {
-        location.reload(); // Refresh akan otomatis memicu onDisconnect
+    stopBtn.onclick = () => {
+        update(ref(db, `users/${userSelect.value}`), { isCalling: false });
     };
+
+    document.getElementById('logout-btn').onclick = () => location.reload();
 }

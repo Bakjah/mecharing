@@ -10,14 +10,17 @@
     <div id="alarm-overlay" class="overlay hidden">
         <div class="overlay-content">
             <h1 class="blink">EMERGENCY CALL!</h1>
-            <p>Operator sedang memanggil Anda...</p>
-            <button id="stop-alarm-btn" class="btn-stop">STOP ALARM</button>
+            <p>Operator memanggil Anda, segera respon!</p>
+            <div class="btn-group-vertical">
+                <button id="otw-btn" class="btn-otw">🏃 SAYA OTW!</button>
+                <button id="stop-alarm-btn" class="btn-stop">MATIKAN ALARM</button>
+            </div>
         </div>
     </div>
 
     <div class="container" id="login-section">
         <div class="card">
-            <h2>Pilih Identitas</h2>
+            <h2>Pilih Identitas Anda</h2>
             <select id="user-select" class="custom-select">
                 <option value="user1">Chloe Lonicera</option>
                 <option value="user2">Jackob Bienvenida</option>
@@ -32,15 +35,14 @@
 
     <div class="container hidden" id="status-section">
         <div class="card">
-            <div class="status-badge online">ONLINE</div>
+            <div id="status-indicator" class="status-badge online">ONLINE</div>
             <h2 id="display-username">Nama User</h2>
-            <p>Siap menerima panggilan...</p>
+            <p id="status-text">Menunggu instruksi...</p>
             <button id="logout-btn" class="btn btn-secondary">OFFLINE / KELUAR</button>
         </div>
     </div>
 
     <audio id="alarm-sound" src="alarm.mp3" preload="auto" loop></audio>
-    
     <script type="module" src="script.js"></script>
 </body>
 </html>
