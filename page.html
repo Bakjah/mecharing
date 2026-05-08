@@ -5,22 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Client Page</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="alarm-overlay" class="overlay hidden">
         <div class="overlay-content">
             <h1 class="blink">EMERGENCY CALL!</h1>
-            <p>Operator memanggil Anda, segera respon!</p>
+            <p style="font-size: 1.2rem; margin-bottom: 30px;">Operator membutuhkan kehadiran Anda segera.</p>
             <div class="btn-group-vertical">
-                <button id="otw-btn" class="btn-otw">🏃 SAYA OTW!</button>
-                <button id="stop-alarm-btn" class="btn-stop">MATIKAN ALARM</button>
+                <button id="otw-btn" class="btn-otw">🏃 SAYA OTW SEKARANG!</button>
+                <button id="stop-alarm-btn" class="btn-stop">HANYA MATIKAN ALARM</button>
             </div>
         </div>
     </div>
 
     <div class="container" id="login-section">
         <div class="card">
-            <h2>Pilih Identitas Anda</h2>
+            <h2 style="margin-bottom: 20px;">Pilih Identitas</h2>
             <select id="user-select" class="custom-select">
                 <option value="user1">Chloe Lonicera</option>
                 <option value="user2">Jackob Bienvenida</option>
@@ -29,16 +30,19 @@
                 <option value="user5">Javier Ortega</option>
                 <option value="user6">Zexo Lazarus</option>
             </select>
-            <button id="login-btn" class="btn btn-primary">AKTIFKAN STATUS</button>
+            <button id="login-btn" class="btn btn-primary" style="padding: 18px;">AKTIFKAN STATUS ONLINE</button>
         </div>
     </div>
 
     <div class="container hidden" id="status-section">
         <div class="card">
             <div id="status-indicator" class="status-badge online">ONLINE</div>
-            <h2 id="display-username">Nama User</h2>
-            <p id="status-text">Menunggu instruksi...</p>
-            <button id="logout-btn" class="btn btn-secondary">OFFLINE / KELUAR</button>
+            <h2 id="display-username" style="margin: 20px 0 10px 0;">Nama User</h2>
+            <p id="status-text" style="color: #94a3b8; margin-bottom: 20px;">Menunggu Instruksi...</p>
+            
+            <button id="arrived-btn" class="btn btn-success hidden" style="padding: 20px; font-size: 1.1rem;">✅ SAYA SUDAH SAMPAI</button>
+            
+            <button id="logout-btn" class="btn btn-secondary" style="margin-top: 40px; opacity: 0.6;">OFFLINE / KELUAR</button>
         </div>
     </div>
 

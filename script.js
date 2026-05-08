@@ -17,36 +17,50 @@ const isOperator = document.title.includes("Operator");
 
 if (isOperator) {
     const userListDiv = document.getElementById('user-list');
+    const toastContainer = document.getElementById('toast-container');
+    const trackers = {};
+
     onValue(ref(db, 'users'), (snapshot) => {
         userListDiv.innerHTML = "";
         const data = snapshot.val();
         for (let id in data) {
             const user = data[id];
+            if (user.status === 'otw' && !trackers[id]) {
+                showToast(`🏃 ${user.username} sedang OTW!`);
+                trackers[id] = true;
+            } else if (user.status !== 'otw') trackers[id] = false;
+
             const card = document.createElement('div');
             card.className = `user-card ${user.status}`;
             card.innerHTML = `
                 <h3>${user.username}</h3>
-                <p>Status: <strong>${user.status.toUpperCase()}</strong></p>
-                ${user.status === 'online' ? `<button class="btn btn-danger" onclick="window.makeCall('${id}')">CALL</button>` : ''}
-                ${user.status === 'otw' ? `<span class="status-otw-text">🏃 Sedang Menuju Lokasi</span>` : ''}
-            `;
+                <small>${user.status.toUpperCase()}</small>
+                <div style="margin-top:20px;">
+                    ${user.status === 'online' ? `<button class="btn btn-danger" onclick="window.makeCall('${id}')">CALL</button>` : ''}
+                    ${user.status === 'otw' ? `<p style="color:#fbbf24; font-weight:800;">📍 SEDANG JALAN</p>` : ''}
+                </div>`;
             userListDiv.appendChild(card);
         }
     });
+
+    function showToast(msg) {
+        const t = document.createElement('div'); t.className = 'toast'; t.innerText = msg;
+        toastContainer.appendChild(t); setTimeout(() => t.remove(), 4000);
+    }
     window.makeCall = (id) => update(ref(db, `users/${id}`), { isCalling: true });
 
 } else {
     const loginBtn = document.getElementById('login-btn');
     const userSelect = document.getElementById('user-select');
-    const overlay = document.getElementById('alarm-overlay');
-    const audio = document.getElementById('alarm-sound');
     const otwBtn = document.getElementById('otw-btn');
+    const arrivedBtn = document.getElementById('arrived-btn');
     const stopBtn = document.getElementById('stop-alarm-btn');
+    const audio = document.getElementById('alarm-sound');
+    const overlay = document.getElementById('alarm-overlay');
 
     loginBtn.onclick = () => {
         const id = userSelect.value;
         const userRef = ref(db, `users/${id}`);
-        
         update(userRef, { status: "online", isCalling: false });
         onDisconnect(userRef).update({ status: "offline", isCalling: false });
 
@@ -55,30 +69,26 @@ if (isOperator) {
         document.getElementById('display-username').innerText = userSelect.options[userSelect.selectedIndex].text;
 
         onValue(userRef, (snap) => {
-            const data = snap.val();
-            if (data?.isCalling === true) {
-                overlay.classList.remove('hidden');
-                audio.play().catch(() => {});
-            } else {
-                overlay.classList.add('hidden');
-                audio.pause();
-                audio.currentTime = 0;
-            }
+            const val = snap.val();
+            if (val?.isCalling) { overlay.classList.remove('hidden'); audio.play().catch(() => {}); }
+            else { overlay.classList.add('hidden'); audio.pause(); audio.currentTime = 0; }
             
-            // Update UI status di halaman client sendiri
-            const indicator = document.getElementById('status-indicator');
-            indicator.className = `status-badge ${data.status}`;
-            indicator.innerText = data.status.toUpperCase();
+            const badge = document.getElementById('status-indicator');
+            badge.className = `status-badge ${val.status}`;
+            badge.innerText = val.status.toUpperCase();
+
+            if (val.status === 'otw') {
+                arrivedBtn.classList.remove('hidden');
+                document.getElementById('status-text').innerText = "Status: Dalam Perjalanan...";
+            } else {
+                arrivedBtn.classList.add('hidden');
+                document.getElementById('status-text').innerText = "Menunggu Instruksi...";
+            }
         });
     };
 
-    otwBtn.onclick = () => {
-        update(ref(db, `users/${userSelect.value}`), { status: "otw", isCalling: false });
-    };
-
-    stopBtn.onclick = () => {
-        update(ref(db, `users/${userSelect.value}`), { isCalling: false });
-    };
-
+    otwBtn.onclick = () => update(ref(db, `users/${userSelect.value}`), { status: "otw", isCalling: false });
+    arrivedBtn.onclick = () => update(ref(db, `users/${userSelect.value}`), { status: "online" });
+    stopBtn.onclick = () => update(ref(db, `users/${userSelect.value}`), { isCalling: false });
     document.getElementById('logout-btn').onclick = () => location.reload();
 }
