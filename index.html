@@ -3,22 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Operator Dashboard</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>Pusat Bantuan Mekanik</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0f1e;
+            --card: #111827;
+            --card2: #1a2235;
+            --border: #1f2d45;
+            --primary: #3b82f6;
+            --danger: #ef4444;
+            --success: #10b981;
+            --text: #f1f5f9;
+            --dim: #64748b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 32px 20px 60px;
+            background-image:
+                radial-gradient(ellipse at 15% 10%, rgba(59,130,246,0.07) 0%, transparent 55%),
+                radial-gradient(ellipse at 85% 85%, rgba(239,68,68,0.06) 0%, transparent 55%);
+        }
+        .wrap { width: 100%; max-width: 460px; animation: fadeUp .5s ease both; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(18px) } to { opacity:1; transform:none } }
+
+        .header { text-align: center; margin-bottom: 28px; }
+        .logo {
+            width: 68px; height: 68px;
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            border-radius: 22px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px; margin: 0 auto 18px;
+            box-shadow: 0 8px 32px rgba(239,68,68,0.35);
+        }
+        h1 { font-family: 'Syne', sans-serif; font-size: 1.85rem; font-weight: 800; letter-spacing: -1px; line-height: 1.15; }
+        h1 em { color: var(--danger); font-style: normal; }
+        .subtitle { margin-top: 8px; color: var(--dim); font-size: 0.88rem; }
+
+        .badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(16,185,129,.1); border: 1px solid rgba(16,185,129,.25);
+            padding: 5px 14px; border-radius: 999px; font-size: .8rem;
+            color: var(--success); margin-top: 12px; font-weight: 600;
+        }
+        .pulse {
+            width: 8px; height: 8px; background: var(--success); border-radius: 50%;
+            animation: pulse 1.6s ease infinite;
+        }
+        @keyframes pulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,.5) }
+            50% { box-shadow: 0 0 0 7px rgba(16,185,129,0) }
+        }
+
+        .card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 20px; padding: 22px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.5); margin-bottom: 20px;
+        }
+        label {
+            display: block; font-size: .76rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: .07em;
+            color: var(--dim); margin-bottom: 8px;
+        }
+        textarea {
+            width: 100%; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 12px; padding: 14px 16px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: .95rem;
+            height: 120px; resize: none; transition: border-color .2s, box-shadow .2s;
+            margin-bottom: 14px;
+        }
+        textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+        textarea::placeholder { color: var(--dim); }
+
+        .sos-btn {
+            width: 100%; padding: 17px;
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            color: white; border: none; border-radius: 14px;
+            font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800;
+            letter-spacing: 1.5px; cursor: pointer;
+            transition: filter .2s, transform .15s;
+            box-shadow: 0 8px 24px rgba(239,68,68,.35);
+        }
+        .sos-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .sos-btn:active { transform: scale(.98); }
+        .sos-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+        .section-hd {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .section-hd h2 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
+        .count-badge {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 999px; padding: 3px 12px; font-size: .75rem; color: var(--dim);
+        }
+
+        .call-list { display: flex; flex-direction: column; gap: 10px; }
+        .call-item {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 14px; padding: 13px 15px;
+            display: flex; align-items: center; gap: 12px;
+            animation: fadeUp .3s ease both;
+        }
+        .call-item.done { opacity: .4; }
+        .call-icon {
+            width: 38px; height: 38px; border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 17px; flex-shrink: 0;
+        }
+        .call-icon.w { background: rgba(239,68,68,.15); }
+        .call-icon.r { background: rgba(59,130,246,.15); }
+        .call-icon.d { background: rgba(16,185,129,.15); }
+        .call-body { flex: 1; min-width: 0; }
+        .call-msg { font-size: .87rem; font-weight: 500; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .call-meta { font-size: .73rem; color: var(--dim); display: flex; gap: 8px; align-items: center; }
+        .sdot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .sdot.w { background: var(--danger); }
+        .sdot.r { background: var(--primary); }
+        .sdot.d { background: var(--success); }
+
+        .empty { text-align: center; padding: 28px; color: var(--dim); font-size: .87rem; }
+
+        .toast {
+            position: fixed; bottom: 20px; left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--card2); border: 1px solid var(--border);
+            border-radius: 12px; padding: 11px 20px; font-size: .87rem;
+            transition: transform .35s cubic-bezier(.34,1.56,.64,1); z-index: 999; white-space: nowrap;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+    </style>
 </head>
 <body>
-    <div id="toast-container"></div>
-
-    <div class="container">
-        <header style="margin-bottom: 40px;">
-            <h1 style="font-size: 2.5rem; letter-spacing: -1px;">Global Caller System</h1>
-            <p style="color: #94a3b8;">Real-time Personnel Monitoring Dashboard</p>
-        </header>
-
-        <div id="user-list" class="user-grid"></div>
+<div class="wrap">
+    <div class="header">
+        <div class="logo">🔧</div>
+        <h1>Pusat <em>Bantuan</em><br>Mekanik Autojuice</h1>
+        <p class="subtitle">Kirim panggilan darurat ke semua mekanik aktif</p>
+        <div class="badge">
+            <div class="pulse"></div>
+            <span id="online-count">0</span>&nbsp;Mekanik Online
+        </div>
     </div>
 
-    <script type="module" src="script.js"></script>
+    <div class="card">
+        <label for="customer-msg">📍 Detail Masalah &amp; Lokasi Anda</label>
+        <textarea id="customer-msg" placeholder="Contoh: Ban bocor di dekat Central HQ, telfon 3424324 pls atau saya mau modif dan repair di ws"></textarea>
+        <button class="sos-btn" id="broadcast-btn">🚨 &nbsp;PANGGIL SEMUA MEKANIK</button>
+    </div>
+
+    <div class="section-hd">
+        <h2>Riwayat Panggilan</h2>
+        <span class="count-badge" id="call-count">0 panggilan</span>
+    </div>
+    <div class="call-list" id="call-list">
+        <div class="empty">Belum ada panggilan dikirim.</div>
+    </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, onValue }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBpKmLeUj6XACRQuecJdG0t2AK-BGDyt5w",
+    authDomain: "myfrist-22b3e.firebaseapp.com",
+    databaseURL: "https://myfrist-22b3e-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "myfrist-22b3e",
+    storageBucket: "myfrist-22b3e.firebasestorage.app",
+    messagingSenderId: "893072627803",
+    appId: "1:893072627803:web:5a6e93cdc36b8867f3877e"
+};
+const db = getDatabase(initializeApp(firebaseConfig));
+
+// Online counter
+onValue(ref(db, 'online_users'), snap => {
+    document.getElementById('online-count').textContent =
+        snap.exists() ? Object.keys(snap.val()).length : 0;
+});
+
+// Broadcast
+document.getElementById('broadcast-btn').onclick = () => {
+    const ta = document.getElementById('customer-msg');
+    const msg = ta.value.trim();
+    if (!msg) { toast('⚠️ Tulis detail masalah dulu!'); return; }
+
+    const btn = document.getElementById('broadcast-btn');
+    btn.disabled = true;
+    btn.textContent = '⏳  Mengirim...';
+
+    set(ref(db, 'calls/' + Date.now()), {
+        message: msg,
+        status: 'Waiting',
+        responder: '',
+        time: new Date().toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' }),
+        timestamp: Date.now()
+    }).then(() => {
+        toast('✅ Panggilan terkirim! Mekanik segera datang.');
+        ta.value = '';
+    }).catch(e => toast('❌ Gagal: ' + e.message))
+      .finally(() => { btn.disabled = false; btn.textContent = '🚨  PANGGIL SEMUA MEKANIK'; });
+};
+
+// Live history
+onValue(ref(db, 'calls'), snap => {
+    const data = snap.val();
+    const list = document.getElementById('call-list');
+    document.getElementById('call-count').textContent =
+        data ? Object.keys(data).length + ' panggilan' : '0 panggilan';
+
+    if (!data) { list.innerHTML = '<div class="empty">Belum ada panggilan dikirim.</div>'; return; }
+
+    const sorted = Object.entries(data).sort((a,b) => b[1].timestamp - a[1].timestamp);
+    list.innerHTML = '';
+    sorted.forEach(([, call]) => {
+        const isDone = call.status === 'Selesai';
+        const isResp = call.status === 'Direspon';
+        const ic = isDone ? 'd' : isResp ? 'r' : 'w';
+        const emoji = isDone ? '✅' : isResp ? '🔧' : '🆘';
+        const statusTxt = isDone ? 'Selesai' : isResp ? 'Ditangani oleh ' + call.responder : 'Menunggu mekanik...';
+
+        const d = document.createElement('div');
+        d.className = 'call-item' + (isDone ? ' done' : '');
+        d.innerHTML = `
+            <div class="call-icon ${ic}">${emoji}</div>
+            <div class="call-body">
+                <div class="call-msg">${call.message}</div>
+                <div class="call-meta">
+                    <span class="sdot ${ic}"></span>
+                    <span>${statusTxt}</span>
+                    <span>· ${call.time}</span>
+                </div>
+            </div>`;
+        list.appendChild(d);
+    });
+});
+
+function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
 </body>
 </html>

@@ -3,48 +3,582 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Client Page</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>Mekanik Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0f1e;
+            --card: #111827;
+            --card2: #1a2235;
+            --border: #1f2d45;
+            --primary: #3b82f6;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warn: #f59e0b;
+            --text: #f1f5f9;
+            --dim: #64748b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            padding: 28px 20px 60px;
+            background-image:
+                radial-gradient(ellipse at 10% 10%, rgba(59,130,246,0.07) 0%, transparent 55%),
+                radial-gradient(ellipse at 90% 90%, rgba(16,185,129,0.05) 0%, transparent 55%);
+        }
+        .page { max-width: 960px; margin: 0 auto; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:none } }
+
+        /* ====== LOGIN ====== */
+        #login-section {
+            max-width: 420px; margin: 60px auto 0;
+            animation: fadeUp .5s ease both;
+        }
+        .login-logo {
+            width: 60px; height: 60px;
+            background: linear-gradient(135deg, var(--primary), #1d4ed8);
+            border-radius: 18px; display: flex; align-items: center;
+            justify-content: center; font-size: 26px;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 28px rgba(59,130,246,.35);
+        }
+        .login-title {
+            font-family: 'Syne', sans-serif; font-size: 1.6rem;
+            font-weight: 800; text-align: center; margin-bottom: 6px; letter-spacing: -.5px;
+        }
+        .login-sub { text-align: center; color: var(--dim); font-size: .87rem; margin-bottom: 28px; }
+
+        .card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 20px; padding: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.5);
+        }
+        label {
+            display: block; font-size: .75rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: .07em;
+            color: var(--dim); margin-bottom: 8px;
+        }
+        select, input[type="password"] {
+            width: 100%; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 12px; padding: 13px 16px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: .95rem;
+            margin-bottom: 16px; transition: border-color .2s, box-shadow .2s;
+        }
+        select {
+            appearance: none; cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 14px center; background-size: 16px;
+            padding-right: 44px;
+        }
+        select:focus, input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+        option { background: var(--card); }
+        label.mt { margin-top: 4px; }
+
+        .btn {
+            width: 100%; padding: 15px; border: none; border-radius: 12px;
+            font-family: 'Syne', sans-serif; font-size: .95rem; font-weight: 800;
+            letter-spacing: 1px; cursor: pointer; transition: filter .2s, transform .15s;
+        }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), #1d4ed8); color: white; box-shadow: 0 6px 20px rgba(59,130,246,.35); }
+        .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .btn-primary:active { transform: scale(.98); }
+
+        /* ====== DASHBOARD ====== */
+        #mechanic-section { display: none; animation: fadeUp .4s ease both; }
+
+        .topbar {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 24px; flex-wrap: wrap; gap: 14px;
+        }
+        .topbar-left h2 {
+            font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; letter-spacing: -.5px;
+        }
+        .topbar-left p { color: var(--dim); font-size: .85rem; margin-top: 3px; }
+        .user-chip {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(59,130,246,.15); border: 1px solid rgba(59,130,246,.3);
+            padding: 7px 16px; border-radius: 999px; font-size: .82rem; font-weight: 600;
+        }
+        .green-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success); }
+
+        /* Stats row */
+        .stats {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 16px 18px;
+        }
+        .stat-label { font-size: .73rem; color: var(--dim); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+        .stat-val { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; }
+        .stat-val.red { color: var(--danger); }
+        .stat-val.blue { color: var(--primary); }
+        .stat-val.green { color: var(--success); }
+
+        /* Alarm banner */
+        #alarm-banner {
+            display: none;
+            background: linear-gradient(135deg, rgba(239,68,68,.2), rgba(239,68,68,.05));
+            border: 1px solid rgba(239,68,68,.5);
+            border-radius: 14px; padding: 14px 18px;
+            margin-bottom: 20px;
+            display: none; align-items: center; gap: 14px;
+            animation: alarmPulse 1s ease infinite;
+        }
+        @keyframes alarmPulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,.3) }
+            50% { box-shadow: 0 0 0 8px rgba(239,68,68,0) }
+        }
+        #alarm-banner.visible { display: flex; }
+        .alarm-icon { font-size: 24px; animation: shake .4s ease infinite; }
+        @keyframes shake {
+            0%,100% { transform: rotate(0) }
+            25% { transform: rotate(-12deg) }
+            75% { transform: rotate(12deg) }
+        }
+        .alarm-text strong { display: block; font-size: .95rem; font-weight: 600; color: var(--danger); }
+        .alarm-text span { font-size: .82rem; color: var(--dim); }
+
+        /* Section header */
+        .sec-hd {
+            display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+        }
+        .sec-hd h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
+        .sec-badge {
+            background: var(--card2); border: 1px solid var(--border);
+            border-radius: 999px; padding: 2px 10px; font-size: .72rem; color: var(--dim);
+        }
+        .sec-badge.red { background: rgba(239,68,68,.15); border-color: rgba(239,68,68,.3); color: var(--danger); }
+
+        /* Table */
+        .tbl-wrap {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 18px; overflow: hidden; margin-bottom: 24px;
+        }
+        .tbl-scroll { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        thead tr { border-bottom: 1px solid var(--border); }
+        th {
+            padding: 13px 16px; text-align: left;
+            font-size: .72rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: .07em; color: var(--dim); white-space: nowrap;
+        }
+        td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: .88rem; vertical-align: middle; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr { transition: background .15s; }
+        tbody tr:hover { background: rgba(255,255,255,.02); }
+        tbody tr.new-row { animation: rowIn .35s ease both; }
+        @keyframes rowIn { from { opacity:0; transform:translateX(-8px) } to { opacity:1; transform:none } }
+
+        .msg-cell { max-width: 220px; }
+        .msg-text { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .time-text { font-size: .75rem; color: var(--dim); margin-top: 3px; }
+
+        .status-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 12px; border-radius: 999px; font-size: .75rem; font-weight: 600; white-space: nowrap;
+        }
+        .status-pill.waiting { background: rgba(239,68,68,.15); color: var(--danger); border: 1px solid rgba(239,68,68,.3); }
+        .status-pill.responded { background: rgba(59,130,246,.15); color: var(--primary); border: 1px solid rgba(59,130,246,.3); }
+        .spill-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+        .responder-name { font-size: .75rem; color: var(--dim); margin-top: 4px; }
+
+        .action-btn {
+            padding: 7px 14px; border: none; border-radius: 8px;
+            font-family: 'DM Sans', sans-serif; font-size: .78rem; font-weight: 600;
+            cursor: pointer; transition: filter .15s, transform .1s; white-space: nowrap;
+        }
+        .action-btn:active { transform: scale(.96); }
+        .btn-take { background: var(--primary); color: white; }
+        .btn-take:hover { filter: brightness(1.15); }
+        .btn-done { background: var(--success); color: white; }
+        .btn-done:hover { filter: brightness(1.1); }
+        .btn-other { background: var(--card2); color: var(--dim); cursor: default; }
+
+        .empty-row td { text-align: center; padding: 40px; color: var(--dim); font-size: .88rem; }
+
+        /* My calls table */
+        .my-call-item {
+            background: var(--card2); border: 1px solid var(--border);
+            border-radius: 12px; padding: 14px 16px;
+            display: flex; align-items: center; gap: 14px; margin-bottom: 10px;
+            animation: fadeUp .3s ease both;
+        }
+        .my-call-icon {
+            width: 38px; height: 38px; background: rgba(59,130,246,.15);
+            border-radius: 11px; display: flex; align-items: center;
+            justify-content: center; font-size: 17px; flex-shrink: 0;
+        }
+        .my-call-body { flex: 1; min-width: 0; }
+        .my-call-msg { font-weight: 500; font-size: .88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .my-call-meta { font-size: .73rem; color: var(--dim); margin-top: 4px; }
+        .my-call-finish {
+            padding: 7px 14px; background: var(--success); color: white;
+            border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif;
+            font-size: .78rem; font-weight: 600; cursor: pointer;
+            transition: filter .15s; flex-shrink: 0;
+        }
+        .my-call-finish:hover { filter: brightness(1.1); }
+        .my-empty { color: var(--dim); font-size: .87rem; padding: 16px 0; }
+
+        @media (max-width: 640px) {
+            .stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+            .stat-val { font-size: 1.3rem; }
+            th, td { padding: 10px 12px; }
+        }
+    </style>
 </head>
 <body>
-    <div id="alarm-overlay" class="overlay hidden">
-        <div class="overlay-content">
-            <h1 class="blink">EMERGENCY CALL!</h1>
-            <p style="font-size: 1.2rem; margin-bottom: 30px;">Operator membutuhkan Anda segera.</p>
-            <div class="btn-group-vertical">
-                <button id="otw-btn" class="btn-otw">🏃 SAYA OTW SEKARANG!</button>
-                <button id="stop-alarm-btn" class="btn-stop">HANYA MATIKAN ALARM</button>
+<div class="page">
+
+    <!-- ====== LOGIN ====== -->
+    <div id="login-section">
+        <div class="login-logo">⚙️</div>
+        <div class="login-title">Mekanik Login</div>
+        <div class="login-sub">Masuk untuk memantau dan merespons panggilan</div>
+
+        <div class="card">
+            <label for="user-select">Pilih Nama Anda</label>
+            <select id="user-select">
+                <option value="">— Memuat daftar user… —</option>
+            </select>
+
+            <label class="mt" for="pin-input">PIN Akses</label>
+            <input type="password" id="pin-input" placeholder="••••••">
+
+            <button class="btn btn-primary" id="login-btn">MASUK DASHBOARD</button>
+        </div>
+    </div>
+
+    <!-- ====== DASHBOARD ====== -->
+    <div id="mechanic-section">
+        <!-- Topbar -->
+        <div class="topbar">
+            <div class="topbar-left">
+                <h2>Dashboard Mekanik</h2>
+                <p>Pantau &amp; respons panggilan secara real-time</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div class="user-chip">
+                    <div class="green-dot"></div>
+                    <span id="display-name">—</span>
+                </div>
+                <button id="logout-btn" style="padding:7px 16px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.35);color:#ef4444;border-radius:999px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Logout</button>
             </div>
         </div>
-    </div>
 
-    <div class="container" id="login-section">
-        <div class="card">
-            <h2 style="margin-bottom: 20px;">Pilih Identitas</h2>
-            <select id="user-select" class="custom-select">
-                <option value="user1">Chloe Lonicera</option>
-                <option value="user2">Jackob Bienvenida</option>
-                <option value="user3">Dante Moruga</option>
-                <option value="user4">Bruno Jaramilo</option>
-                <option value="user5">Javier Ortega</option>
-                <option value="user6">Zexo Lazarus</option>
-            </select>
-            <button id="login-btn" class="btn btn-primary" style="padding: 18px;">AKTIFKAN STATUS ONLINE</button>
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">Menunggu</div>
+                <div class="stat-val red" id="stat-waiting">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Direspon</div>
+                <div class="stat-val blue" id="stat-responded">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Online</div>
+                <div class="stat-val green" id="online-count">0</div>
+            </div>
         </div>
-    </div>
 
-    <div class="container hidden" id="status-section">
-        <div class="card">
-            <div id="status-indicator" class="status-badge">ONLINE</div>
-            <h2 id="display-username" style="margin: 20px 0 10px 0;">Nama User</h2>
-            <p id="status-text" style="color: #94a3b8; margin-bottom: 20px;">Menunggu Instruksi...</p>
-            <button id="arrived-btn" class="btn btn-success hidden" style="padding: 20px;">✅ SAYA SUDAH SAMPAI</button>
-            <button id="logout-btn" class="btn btn-secondary" style="margin-top: 40px; opacity: 0.6;">OFFLINE / KELUAR</button>
+        <!-- Alarm Banner -->
+        <div id="alarm-banner">
+            <div class="alarm-icon">🚨</div>
+            <div class="alarm-text">
+                <strong>Ada Panggilan Baru Masuk!</strong>
+                <span id="alarm-count">1 panggilan menunggu respons</span>
+            </div>
         </div>
+
+        <!-- All Calls Table -->
+        <div class="sec-hd">
+            <h3>Semua Panggilan Aktif</h3>
+            <span class="sec-badge red" id="active-badge">0 aktif</span>
+        </div>
+        <div class="tbl-wrap">
+            <div class="tbl-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Waktu</th>
+                            <th>Pesan / Lokasi</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="call-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- My Active Calls -->
+        <div class="sec-hd">
+            <h3>Pesanan Saya</h3>
+            <span class="sec-badge" id="my-badge">0 pesanan</span>
+        </div>
+        <div id="my-calls-list"></div>
     </div>
 
-    <audio id="alarm-sound" src="alarm.mp3" preload="auto" loop></audio>
-    <script type="module" src="script.js"></script>
+</div>
+
+<!-- Alarm audio (beep via Web Audio API, no file needed) -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, remove, update, onValue, onDisconnect, push }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBpKmLeUj6XACRQuecJdG0t2AK-BGDyt5w",
+    authDomain: "myfrist-22b3e.firebaseapp.com",
+    databaseURL: "https://myfrist-22b3e-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "myfrist-22b3e",
+    storageBucket: "myfrist-22b3e.firebasestorage.app",
+    messagingSenderId: "893072627803",
+    appId: "1:893072627803:web:5a6e93cdc36b8867f3877e"
+};
+const db = getDatabase(initializeApp(firebaseConfig));
+
+// ── Online counter (display only, presence registered after login) ──
+onValue(ref(db, 'online_users'), snap => {
+    const c = snap.exists() ? Object.keys(snap.val()).length : 0;
+    const el = document.getElementById('online-count');
+    if (el) el.textContent = c;
+});
+
+// presence ref disimpan agar bisa dihapus saat logout
+let myPresenceRef = null;
+
+function registerPresence() {
+    onValue(ref(db, '.info/connected'), snap => {
+        if (snap.val() === true) {
+            myPresenceRef = push(ref(db, 'online_users'));
+            set(myPresenceRef, true);
+            onDisconnect(myPresenceRef).remove();
+        }
+    });
+}
+
+// ── Login ──────────────────────────────────────────────────────
+const MASTER_HASH = "d295f3500f6895062de780b07f1c00f6ba84901dc109b3d87afb40978a799b35";
+let myName = '', myKey = '';
+
+// Load users dropdown
+onValue(ref(db, 'users'), snap => {
+    const sel = document.getElementById('user-select');
+    if (!sel) return;
+    const users = snap.val();
+    sel.innerHTML = '<option value="">— Pilih Nama Anda —</option>';
+    if (users) {
+        Object.keys(users).forEach(k => {
+            const o = document.createElement('option');
+            o.value = k; o.textContent = users[k].username;
+            sel.appendChild(o);
+        });
+    }
+});
+
+document.getElementById('login-btn').onclick = async () => {
+    const sel = document.getElementById('user-select');
+    const pin = document.getElementById('pin-input').value;
+    if (!sel.value) { alert('Pilih nama dulu!'); return; }
+    if (!pin) { alert('PIN tidak boleh kosong!'); return; }
+
+    const hash = await sha256(pin);
+    if (hash !== MASTER_HASH) { alert('❌ PIN Salah!'); return; }
+
+    myName = sel.options[sel.selectedIndex].text;
+    myKey  = sel.value;
+
+    localStorage.setItem('mech_name', myName);
+    localStorage.setItem('mech_key', myKey);
+
+    const userRef = ref(db, `users/${myKey}`);
+    update(userRef, { status: 'online' });
+    onDisconnect(userRef).update({ status: 'offline' });
+
+    // Daftarkan presence HANYA setelah login berhasil
+    registerPresence();
+
+    document.getElementById('login-section').style.display = 'none';
+    document.getElementById('mechanic-section').style.display = 'block';
+    document.getElementById('display-name').textContent = myName;
+
+    startDashboard();
+
+    // Logout handler
+    document.getElementById('logout-btn').onclick = async () => {
+        if (!confirm('Yakin mau logout?')) return;
+        // Hapus presence manual
+        if (myPresenceRef) await remove(myPresenceRef);
+        // Set status offline
+        await update(ref(db, `users/${myKey}`), { status: 'offline' });
+        localStorage.removeItem('mech_name');
+        localStorage.removeItem('mech_key');
+        location.reload();
+    };
+};
+
+async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── Dashboard ──────────────────────────────────────────────────
+let prevWaitingCount = 0;
+let audioCtx = null;
+
+function beep() {
+    try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        [0, 200, 400].forEach(delay => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.frequency.value = 880;
+            gain.gain.setValueAtTime(0.4, audioCtx.currentTime + delay/1000);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay/1000 + 0.25);
+            osc.start(audioCtx.currentTime + delay/1000);
+            osc.stop(audioCtx.currentTime + delay/1000 + 0.25);
+        });
+    } catch(e) {}
+}
+
+function startDashboard() {
+    const tbody = document.getElementById('call-table-body');
+    const myList = document.getElementById('my-calls-list');
+    const alarmBanner = document.getElementById('alarm-banner');
+
+    onValue(ref(db, 'calls'), snap => {
+        const data = snap.val();
+        tbody.innerHTML = '';
+        myList.innerHTML = '';
+
+        if (!data) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Belum ada panggilan aktif.</td></tr>';
+            myList.innerHTML = '<div class="my-empty">Anda belum mengambil pesanan.</div>';
+            updateStats(0, 0);
+            updateAlarm(0);
+            return;
+        }
+
+        // Filter active (non-Selesai)
+        const active = Object.entries(data)
+            .filter(([, c]) => c.status !== 'Selesai')
+            .sort((a, b) => b[1].timestamp - a[1].timestamp);
+
+        let waitingCount = 0, respondedCount = 0, myCalls = [];
+
+        // ── All Calls Table ──
+        if (active.length === 0) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Semua panggilan sudah diselesaikan ✅</td></tr>';
+        } else {
+            active.forEach(([id, call], i) => {
+                const isWaiting  = call.status === 'Waiting';
+                const isMyCall   = call.responder === myName;
+                if (isWaiting) waitingCount++;
+                else respondedCount++;
+                if (!isWaiting && isMyCall) myCalls.push([id, call]);
+
+                const statusPill = isWaiting
+                    ? `<span class="status-pill waiting"><span class="spill-dot"></span>Menunggu</span>`
+                    : `<span class="status-pill responded"><span class="spill-dot"></span>Direspon</span>`;
+
+                const responderLine = (!isWaiting && call.responder)
+                    ? `<div class="responder-name">oleh ${call.responder}</div>` : '';
+
+                let actionBtn = '';
+                if (isWaiting) {
+                    actionBtn = `<button class="action-btn btn-take" onclick="takeCall('${id}')">Ambil</button>`;
+                } else if (isMyCall) {
+                    actionBtn = `<button class="action-btn btn-done" onclick="finishCall('${id}')">Selesaikan ✓</button>`;
+                } else {
+                    actionBtn = `<span class="action-btn btn-other">Ditangani</span>`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = 'new-row';
+                tr.innerHTML = `
+                    <td style="color:var(--dim);font-weight:600">${i+1}</td>
+                    <td style="white-space:nowrap;color:var(--dim);font-size:.8rem">${call.time}</td>
+                    <td class="msg-cell">
+                        <div class="msg-text">${call.message}</div>
+                    </td>
+                    <td>
+                        ${statusPill}
+                        ${responderLine}
+                    </td>
+                    <td>${actionBtn}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ── My Calls List ──
+        if (myCalls.length === 0) {
+            myList.innerHTML = '<div class="my-empty">Anda belum mengambil pesanan.</div>';
+        } else {
+            myCalls.forEach(([id, call]) => {
+                const div = document.createElement('div');
+                div.className = 'my-call-item';
+                div.innerHTML = `
+                    <div class="my-call-icon">🔧</div>
+                    <div class="my-call-body">
+                        <div class="my-call-msg">${call.message}</div>
+                        <div class="my-call-meta">Diambil pukul ${call.time}</div>
+                    </div>
+                    <button class="my-call-finish" onclick="finishCall('${id}')">Selesaikan ✓</button>
+                `;
+                myList.appendChild(div);
+            });
+        }
+
+        document.getElementById('my-badge').textContent = myCalls.length + ' pesanan';
+        document.getElementById('active-badge').textContent = active.length + ' aktif';
+        updateStats(waitingCount, respondedCount);
+        updateAlarm(waitingCount);
+    });
+}
+
+function updateStats(w, r) {
+    document.getElementById('stat-waiting').textContent   = w;
+    document.getElementById('stat-responded').textContent = r;
+}
+
+function updateAlarm(waitingCount) {
+    const banner = document.getElementById('alarm-banner');
+    if (waitingCount > 0) {
+        banner.classList.add('visible');
+        document.getElementById('alarm-count').textContent =
+            waitingCount + ' panggilan menunggu respons';
+        // Beep only when new calls arrive
+        if (waitingCount > prevWaitingCount) beep();
+    } else {
+        banner.classList.remove('visible');
+    }
+    prevWaitingCount = waitingCount;
+}
+
+// ── Global action handlers ─────────────────────────────────────
+window.takeCall = (id) => {
+    update(ref(db, `calls/${id}`), {
+        status: 'Direspon',
+        responder: myName || localStorage.getItem('mech_name')
+    });
+};
+
+window.finishCall = (id) => {
+    // Remove the call entirely from Firebase → disappears everywhere
+    remove(ref(db, `calls/${id}`));
+};
+</script>
 </body>
 </html>
