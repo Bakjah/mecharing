@@ -166,7 +166,7 @@
     <!-- Header -->
     <div class="header">
         <div class="logo">🔧</div>
-        <h1>Auto <em>Juice</em><br>Workshop</h1>
+        <h1>Auto <em>Juice</em><br>Jaya</h1>
         <p class="subtitle">Pilih layanan dan kirim permintaan ke mekanik</p>
         <div class="badge">
             <div class="pulse"></div>
@@ -199,11 +199,11 @@
         <!-- Tow only: No Telpon + Lokasi -->
         <div class="field-group" id="field-telp">
             <label>No. Telepon</label>
-            <input type="tel" id="input-telp" placeholder="Contoh: 8393449...">
+            <input type="tel" id="input-telp" placeholder="Contoh: 08123456789...">
         </div>
         <div class="field-group" id="field-lokasi">
             <label>Lokasi Anda</label>
-            <input type="text" id="input-lokasi" placeholder="Contoh: Jl. Hawic, depan pbh...">
+            <input type="text" id="input-lokasi" placeholder="Contoh: Jl. Sudirman No.5, depan Indomaret...">
         </div>
 
         <!-- Shared: Keterangan/Pesan (all services) -->
@@ -354,7 +354,9 @@ onValue(ref(db, 'calls'), snap => {
         const isResp = call.status === 'Direspon';
         const icClass = isDone ? 'd' : isResp ? 'r' : (call.type === 'tow' ? 'tw' : 'w');
         const emoji = isDone ? '✅' : isResp ? '🔧' : (call.type === 'tow' ? '🚛' : call.type === 'modif' ? '⚙️' : '🔩');
-        const statusTxt = isDone ? 'Selesai' : isResp ? 'Ditangani oleh ' + call.responder : 'Menunggu mekanik...';
+        let statusTxt = isDone ? 'Selesai' : isResp ? 'Ditangani oleh ' + call.responder : 'Menunggu mekanik...';
+        if (isResp && call.progress === 'ontheway') statusTxt = '🛵 Mekanik sedang menuju lokasi Anda';
+        if (isResp && call.progress === 'working')  statusTxt = '🔧 Sedang dikerjakan oleh ' + call.responder;
         const typeLbl = call.typeLabel || call.type || 'Umum';
         const typeClass = call.type || 'repair';
 

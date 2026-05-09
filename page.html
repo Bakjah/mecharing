@@ -228,6 +228,30 @@
 
         .empty-row td { text-align: center; padding: 40px; color: var(--dim); font-size: .88rem; }
 
+        /* ── Status dropdown action ── */
+        .action-area { display: flex; flex-direction: column; gap: 6px; min-width: 160px; }
+        .progress-select {
+            appearance: none; background: var(--card2);
+            border: 1px solid var(--border); border-radius: 9px;
+            padding: 7px 32px 7px 12px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: .78rem; font-weight: 600;
+            cursor: pointer; width: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 10px center; background-size: 14px;
+            transition: border-color .2s;
+        }
+        .progress-select:focus { outline: none; border-color: var(--primary); }
+        .progress-select option { background: var(--card); color: var(--text); }
+        .progress-select.ontheway { border-color: var(--warn); color: var(--warn); background-color: rgba(245,158,11,.1); }
+        .progress-select.working  { border-color: var(--primary); color: var(--primary); background-color: rgba(59,130,246,.1); }
+        .action-row { display: flex; gap: 6px; }
+        .finish-small {
+            flex: 1; padding: 7px 10px; background: var(--success); color: white;
+            border: none; border-radius: 9px; font-family: 'DM Sans', sans-serif;
+            font-size: .75rem; font-weight: 700; cursor: pointer; transition: filter .15s; white-space: nowrap;
+        }
+        .finish-small:hover { filter: brightness(1.1); }
+
         /* My calls table */
         .my-call-item {
             background: var(--card2); border: 1px solid var(--border);
@@ -285,6 +309,7 @@
 <body>
 <div class="page">
 
+    <!-- ====== LOGIN ====== -->
     <div id="login-section">
         <div class="login-logo">⚙️</div>
         <div class="login-title">Mekanik Login</div>
@@ -304,6 +329,7 @@
         </div>
     </div>
 
+    <!-- ====== DASHBOARD ====== -->
     <div id="mechanic-section">
         <!-- Topbar -->
         <div class="topbar">
@@ -320,6 +346,7 @@
             </div>
         </div>
 
+        <!-- Stats -->
         <div class="stats">
             <div class="stat-card">
                 <div class="stat-label">Menunggu</div>
@@ -335,6 +362,7 @@
             </div>
         </div>
 
+        <!-- Online Members Panel -->
         <div class="online-panel">
             <div class="online-panel-hd">
                 <h3>👥 Mekanik Online</h3>
@@ -345,6 +373,7 @@
             </div>
         </div>
 
+        <!-- Alarm Banner -->
         <div id="alarm-banner">
             <div class="alarm-icon">🚨</div>
             <div class="alarm-text">
@@ -353,6 +382,7 @@
             </div>
         </div>
 
+        <!-- All Calls Table -->
         <div class="sec-hd">
             <h3>Semua Panggilan Aktif</h3>
             <span class="sec-badge red" id="active-badge">0 aktif</span>
@@ -366,7 +396,6 @@
                             <th>Waktu</th>
                             <th>Pesan / Lokasi</th>
                             <th>Status</th>
-                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="call-table-body"></tbody>
@@ -374,6 +403,7 @@
             </div>
         </div>
 
+        <!-- My Active Calls -->
         <div class="sec-hd">
             <h3>Pesanan Saya</h3>
             <span class="sec-badge" id="my-badge">0 pesanan</span>
@@ -383,6 +413,7 @@
 
 </div>
 
+<!-- Message Popup Modal -->
 <div class="modal-overlay" id="msg-modal">
     <div class="modal-box">
         <div class="modal-label">📍 Detail Pesan / Lokasi</div>
@@ -431,6 +462,7 @@ function registerPresence() {
 
 let myName = '', myKey = '';
 
+// Cache users from Firebase
 let usersCache = {};
 onValue(ref(db, 'users'), snap => {
     usersCache = snap.val() || {};
@@ -438,7 +470,7 @@ onValue(ref(db, 'users'), snap => {
 
 function shakeInput(el) {
     el.classList.remove('input-error');
-    void el.offsetWidth; // reflow to restart animation
+    void el.offsetWidth;
     el.classList.add('input-error');
     setTimeout(() => el.classList.remove('input-error'), 500);
 }
@@ -502,16 +534,14 @@ document.getElementById('login-btn').onclick = async () => {
 
     document.getElementById('login-section').style.display = 'none';
     document.getElementById('mechanic-section').style.display = 'block';
-    document.getElementById('display-name').textContent = myName; // displayName from Firebase
+    document.getElementById('display-name').textContent = myName;
 
     startDashboard();
     startMembersPanel();
 
     document.getElementById('logout-btn').onclick = async () => {
         if (!confirm('Yakin mau logout?')) return;
-        // Hapus presence manual
         if (myPresenceRef) await remove(myPresenceRef);
-        // Set status offline
         await update(ref(db, `users/${myKey}`), { status: 'offline' });
         localStorage.removeItem('mech_name');
         localStorage.removeItem('mech_key');
@@ -582,7 +612,7 @@ function startDashboard() {
         myList.innerHTML = '';
 
         if (!data) {
-            tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Belum ada panggilan aktif.</td></tr>';
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Belum ada panggilan aktif.</td></tr>';
             myList.innerHTML = '<div class="my-empty">Anda belum mengambil pesanan.</div>';
             updateStats(0, 0);
             updateAlarm(0);
@@ -596,7 +626,7 @@ function startDashboard() {
         let waitingCount = 0, respondedCount = 0, myCalls = [];
 
         if (active.length === 0) {
-            tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Semua panggilan sudah diselesaikan ✅</td></tr>';
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Semua panggilan sudah diselesaikan ✅</td></tr>';
         } else {
             active.forEach(([id, call], i) => {
                 const isWaiting  = call.status === 'Waiting';
@@ -612,13 +642,16 @@ function startDashboard() {
                 const responderLine = (!isWaiting && call.responder)
                     ? `<div class="responder-name">oleh ${call.responder}</div>` : '';
 
-                let actionBtn = '';
+                let progressInfo = '';
+                if (!isWaiting) {
+                    const prog = call.progress || 'none';
+                    if (prog === 'ontheway') progressInfo = `<div style="font-size:.72rem;color:var(--warn);margin-top:4px;">🛵 On The Way</div>`;
+                    else if (prog === 'working') progressInfo = `<div style="font-size:.72rem;color:var(--primary);margin-top:4px;">🔧 Sedang Dikerjakan</div>`;
+                }
+
+                let takeBtn = '';
                 if (isWaiting) {
-                    actionBtn = `<button class="action-btn btn-take" onclick="takeCall('${id}')">Ambil</button>`;
-                } else if (isMyCall) {
-                    actionBtn = `<button class="action-btn btn-done" onclick="finishCall('${id}')">Selesaikan ✓</button>`;
-                } else {
-                    actionBtn = `<span class="action-btn btn-other">Ditangani</span>`;
+                    takeBtn = `<div style="margin-top:6px;"><button class="action-btn btn-take" onclick="takeCall('${id}')" style="padding:6px 12px;font-size:.76rem;">Ambil</button></div>`;
                 }
 
                 const tr = document.createElement('tr');
@@ -633,8 +666,9 @@ function startDashboard() {
                     <td>
                         ${statusPill}
                         ${responderLine}
+                        ${progressInfo}
+                        ${takeBtn}
                     </td>
-                    <td>${actionBtn}</td>
                 `;
                 tr.querySelector('.msg-cell').addEventListener('click', () => openMsgModal(call));
                 tbody.appendChild(tr);
@@ -645,6 +679,8 @@ function startDashboard() {
             myList.innerHTML = '<div class="my-empty">Anda belum mengambil pesanan.</div>';
         } else {
             myCalls.forEach(([id, call]) => {
+                const prog = call.progress || 'none';
+                const selClass = prog === 'ontheway' ? 'ontheway' : prog === 'working' ? 'working' : '';
                 const div = document.createElement('div');
                 div.className = 'my-call-item';
                 div.innerHTML = `
@@ -653,7 +689,14 @@ function startDashboard() {
                         <div class="my-call-msg">${call.message}</div>
                         <div class="my-call-meta">Diambil pukul ${call.time}</div>
                     </div>
-                    <button class="my-call-finish" onclick="finishCall('${id}')">Selesaikan ✓</button>
+                    <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;min-width:150px;">
+                        <select class="progress-select ${selClass}" onchange="updateProgress('${id}', this)" style="width:100%;">
+                            <option value="none"     ${prog==='none'?'selected':''}>— Status Aksi —</option>
+                            <option value="ontheway" ${prog==='ontheway'?'selected':''}>🛵 On The Way</option>
+                            <option value="working"  ${prog==='working'?'selected':''}>🔧 Sedang Dikerjakan</option>
+                        </select>
+                        <button class="my-call-finish" onclick="finishCall('${id}')">Selesaikan ✓</button>
+                    </div>
                 `;
                 myList.appendChild(div);
             });
@@ -661,8 +704,9 @@ function startDashboard() {
 
         document.getElementById('my-badge').textContent = myCalls.length + ' pesanan';
         document.getElementById('active-badge').textContent = active.length + ' aktif';
+        const iHaveActiveCall = myCalls.length > 0;
         updateStats(waitingCount, respondedCount);
-        updateAlarm(waitingCount);
+        updateAlarm(waitingCount, iHaveActiveCall);
     });
 }
 
@@ -671,15 +715,39 @@ function updateStats(w, r) {
     document.getElementById('stat-responded').textContent = r;
 }
 
-function updateAlarm(waitingCount) {
+let alarmInterval  = null;
+let alarmStartTime = null;
+const ALARM_DURATION_MS = 10 * 60 * 1000;
+
+function startAlarmLoop() {
+    if (alarmInterval) return;
+    alarmStartTime = Date.now();
+    beep();
+    alarmInterval = setInterval(() => {
+        if (Date.now() - alarmStartTime >= ALARM_DURATION_MS) {
+            stopAlarmLoop();
+            return;
+        }
+        beep();
+    }, 8000); 
+}
+
+function stopAlarmLoop() {
+    if (alarmInterval) { clearInterval(alarmInterval); alarmInterval = null; }
+    alarmStartTime = null;
+}
+
+function updateAlarm(waitingCount, iHaveActiveCall) {
     const banner = document.getElementById('alarm-banner');
-    if (waitingCount > 0) {
+    if (waitingCount > 0 && !iHaveActiveCall) {
+        // Show banner
         banner.classList.add('visible');
         document.getElementById('alarm-count').textContent =
             waitingCount + ' panggilan menunggu respons';
-        if (waitingCount > prevWaitingCount) beep();
+        if (waitingCount > prevWaitingCount) startAlarmLoop();
     } else {
         banner.classList.remove('visible');
+        stopAlarmLoop();
     }
     prevWaitingCount = waitingCount;
 }
@@ -702,8 +770,15 @@ document.getElementById('msg-modal').addEventListener('click', e => {
 window.takeCall = (id) => {
     update(ref(db, `calls/${id}`), {
         status: 'Direspon',
-        responder: myName || localStorage.getItem('mech_name')
+        responder: myName || localStorage.getItem('mech_name'),
+        progress: 'none'
     });
+};
+
+window.updateProgress = (id, selectEl) => {
+    const val = selectEl.value;
+    selectEl.className = 'progress-select ' + (val === 'ontheway' ? 'ontheway' : val === 'working' ? 'working' : '');
+    update(ref(db, `calls/${id}`), { progress: val });
 };
 
 window.finishCall = (id) => {
