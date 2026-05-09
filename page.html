@@ -33,6 +33,7 @@
         .page { max-width: 960px; margin: 0 auto; }
         @keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:none } }
 
+        /* ====== LOGIN ====== */
         #login-section {
             max-width: 420px; margin: 60px auto 0;
             animation: fadeUp .5s ease both;
@@ -61,21 +62,46 @@
             text-transform: uppercase; letter-spacing: .07em;
             color: var(--dim); margin-bottom: 8px;
         }
-        select, input[type="password"] {
+        input[type="text"], input[type="password"] {
             width: 100%; background: var(--bg); border: 1px solid var(--border);
             border-radius: 12px; padding: 13px 16px; color: var(--text);
             font-family: 'DM Sans', sans-serif; font-size: .95rem;
             margin-bottom: 16px; transition: border-color .2s, box-shadow .2s;
         }
-        select {
-            appearance: none; cursor: pointer;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: right 14px center; background-size: 16px;
-            padding-right: 44px;
-        }
-        select:focus, input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
-        option { background: var(--card); }
+        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+        input::placeholder { color: var(--dim); }
         label.mt { margin-top: 4px; }
+
+        /* error shake */
+        @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
+        .input-error { border-color: var(--danger) !important; animation: shake .4s ease; }
+
+        /* ====== MESSAGE POPUP MODAL ====== */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,.7);
+            backdrop-filter: blur(4px); z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px; opacity: 0; pointer-events: none;
+            transition: opacity .2s;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
+        .modal-box {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 20px; padding: 28px; max-width: 440px; width: 100%;
+            box-shadow: 0 24px 80px rgba(0,0,0,.7);
+            transform: translateY(12px); transition: transform .25s ease;
+        }
+        .modal-overlay.open .modal-box { transform: translateY(0); }
+        .modal-label { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--dim); margin-bottom: 10px; }
+        .modal-msg { font-size: 1rem; font-weight: 500; line-height: 1.6; color: var(--text); word-break: break-word; }
+        .modal-meta { margin-top: 14px; font-size: .78rem; color: var(--dim); display: flex; gap: 16px; }
+        .modal-close {
+            margin-top: 22px; width: 100%; padding: 12px; background: var(--card2);
+            border: 1px solid var(--border); border-radius: 12px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: .88rem; font-weight: 600;
+            cursor: pointer; transition: background .15s;
+        }
+        .modal-close:hover { background: var(--border); }
 
         .btn {
             width: 100%; padding: 15px; border: none; border-radius: 12px;
@@ -86,6 +112,7 @@
         .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
         .btn-primary:active { transform: scale(.98); }
 
+        /* ====== DASHBOARD ====== */
         #mechanic-section { display: none; animation: fadeUp .4s ease both; }
 
         .topbar {
@@ -103,6 +130,7 @@
         }
         .green-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success); }
 
+        /* Stats row */
         .stats {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
             margin-bottom: 24px;
@@ -117,6 +145,7 @@
         .stat-val.blue { color: var(--primary); }
         .stat-val.green { color: var(--success); }
 
+        /* Alarm banner */
         #alarm-banner {
             display: none;
             background: linear-gradient(135deg, rgba(239,68,68,.2), rgba(239,68,68,.05));
@@ -140,6 +169,7 @@
         .alarm-text strong { display: block; font-size: .95rem; font-weight: 600; color: var(--danger); }
         .alarm-text span { font-size: .82rem; color: var(--dim); }
 
+        /* Section header */
         .sec-hd {
             display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
         }
@@ -150,6 +180,7 @@
         }
         .sec-badge.red { background: rgba(239,68,68,.15); border-color: rgba(239,68,68,.3); color: var(--danger); }
 
+        /* Table */
         .tbl-wrap {
             background: var(--card); border: 1px solid var(--border);
             border-radius: 18px; overflow: hidden; margin-bottom: 24px;
@@ -197,6 +228,7 @@
 
         .empty-row td { text-align: center; padding: 40px; color: var(--dim); font-size: .88rem; }
 
+        /* My calls table */
         .my-call-item {
             background: var(--card2); border: 1px solid var(--border);
             border-radius: 12px; padding: 14px 16px;
@@ -236,10 +268,8 @@
         <div class="login-sub">Masuk untuk memantau dan merespons panggilan</div>
 
         <div class="card">
-            <label for="user-select">Pilih Nama Anda</label>
-            <select id="user-select">
-                <option value="">— Memuat daftar user… —</option>
-            </select>
+            <label for="username-input">Username</label>
+            <input type="text" id="username-input" placeholder="Masukkan username Anda..." autocomplete="off" autocapitalize="none">
 
             <label class="mt" for="pin-input">PIN Akses</label>
             <input type="password" id="pin-input" placeholder="••••••">
@@ -264,7 +294,6 @@
             </div>
         </div>
 
-        <!-- Stats -->
         <div class="stats">
             <div class="stat-card">
                 <div class="stat-label">Menunggu</div>
@@ -280,7 +309,6 @@
             </div>
         </div>
 
-        <!-- Alarm Banner -->
         <div id="alarm-banner">
             <div class="alarm-icon">🚨</div>
             <div class="alarm-text">
@@ -289,7 +317,6 @@
             </div>
         </div>
 
-        <!-- All Calls Table -->
         <div class="sec-hd">
             <h3>Semua Panggilan Aktif</h3>
             <span class="sec-badge red" id="active-badge">0 aktif</span>
@@ -320,6 +347,18 @@
 
 </div>
 
+<div class="modal-overlay" id="msg-modal">
+    <div class="modal-box">
+        <div class="modal-label">📍 Detail Pesan / Lokasi</div>
+        <div class="modal-msg" id="modal-msg-text"></div>
+        <div class="modal-meta">
+            <span>🕐 <span id="modal-time"></span></span>
+            <span>📋 <span id="modal-status"></span></span>
+        </div>
+        <button class="modal-close" id="modal-close-btn">Tutup</button>
+    </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, remove, update, onValue, onDisconnect, push }
@@ -335,6 +374,7 @@ const firebaseConfig = {
     appId: "1:893072627803:web:5a6e93cdc36b8867f3877e"
 };
 const db = getDatabase(initializeApp(firebaseConfig));
+
 onValue(ref(db, 'online_users'), snap => {
     const c = snap.exists() ? Object.keys(snap.val()).length : 0;
     const el = document.getElementById('online-count');
@@ -356,31 +396,49 @@ function registerPresence() {
 const MASTER_HASH = "d295f3500f6895062de780b07f1c00f6ba84901dc109b3d87afb40978a799b35";
 let myName = '', myKey = '';
 
+let usersCache = {};
 onValue(ref(db, 'users'), snap => {
-    const sel = document.getElementById('user-select');
-    if (!sel) return;
-    const users = snap.val();
-    sel.innerHTML = '<option value="">— Pilih Nama Anda —</option>';
-    if (users) {
-        Object.keys(users).forEach(k => {
-            const o = document.createElement('option');
-            o.value = k; o.textContent = users[k].username;
-            sel.appendChild(o);
-        });
-    }
+    usersCache = snap.val() || {};
 });
 
+function shakeInput(el) {
+    el.classList.remove('input-error');
+    el.classList.add('input-error');
+    setTimeout(() => el.classList.remove('input-error'), 500);
+}
+
 document.getElementById('login-btn').onclick = async () => {
-    const sel = document.getElementById('user-select');
-    const pin = document.getElementById('pin-input').value;
-    if (!sel.value) { alert('Pilih nama dulu!'); return; }
-    if (!pin) { alert('PIN tidak boleh kosong!'); return; }
+    const usernameEl = document.getElementById('username-input');
+    const pinEl      = document.getElementById('pin-input');
+    const typedName  = usernameEl.value.trim();
+    const pin        = pinEl.value;
+
+    if (!typedName) { shakeInput(usernameEl); usernameEl.focus(); return; }
+    if (!pin)       { shakeInput(pinEl); pinEl.focus(); return; }
+
+    const matchedKey = Object.keys(usersCache).find(
+        k => usersCache[k].username.toLowerCase() === typedName.toLowerCase()
+    );
+    if (!matchedKey) {
+        shakeInput(usernameEl);
+        usernameEl.focus();
+        usernameEl.placeholder = '❌ Username tidak ditemukan!';
+        setTimeout(() => usernameEl.placeholder = 'Masukkan username Anda...', 2000);
+        return;
+    }
 
     const hash = await sha256(pin);
-    if (hash !== MASTER_HASH) { alert('❌ PIN Salah!'); return; }
+    if (hash !== MASTER_HASH) {
+        shakeInput(pinEl);
+        pinEl.value = '';
+        pinEl.focus();
+        pinEl.placeholder = '❌ PIN salah!';
+        setTimeout(() => pinEl.placeholder = '••••••', 2000);
+        return;
+    }
 
-    myName = sel.options[sel.selectedIndex].text;
-    myKey  = sel.value;
+    myName = usersCache[matchedKey].username;
+    myKey  = matchedKey;
 
     localStorage.setItem('mech_name', myName);
     localStorage.setItem('mech_key', myKey);
@@ -486,8 +544,9 @@ function startDashboard() {
                 tr.innerHTML = `
                     <td style="color:var(--dim);font-weight:600">${i+1}</td>
                     <td style="white-space:nowrap;color:var(--dim);font-size:.8rem">${call.time}</td>
-                    <td class="msg-cell">
-                        <div class="msg-text">${call.message}</div>
+                    <td class="msg-cell" style="cursor:pointer;" title="Klik untuk lihat pesan lengkap">
+                        <div class="msg-text" style="color:var(--primary);text-decoration:underline dotted;">${call.message}</div>
+                        <div style="font-size:.7rem;color:var(--dim);margin-top:3px;">Klik untuk detail</div>
                     </td>
                     <td>
                         ${statusPill}
@@ -495,6 +554,7 @@ function startDashboard() {
                     </td>
                     <td>${actionBtn}</td>
                 `;
+                tr.querySelector('.msg-cell').addEventListener('click', () => openMsgModal(call));
                 tbody.appendChild(tr);
             });
         }
@@ -541,6 +601,21 @@ function updateAlarm(waitingCount) {
     }
     prevWaitingCount = waitingCount;
 }
+
+function openMsgModal(call) {
+    const statusText = call.status === 'Waiting' ? 'Menunggu mekanik'
+        : call.status === 'Direspon' ? 'Direspon oleh ' + call.responder
+        : 'Selesai';
+    document.getElementById('modal-msg-text').textContent = call.message;
+    document.getElementById('modal-time').textContent = call.time;
+    document.getElementById('modal-status').textContent = statusText;
+    document.getElementById('msg-modal').classList.add('open');
+}
+document.getElementById('modal-close-btn').onclick = () =>
+    document.getElementById('msg-modal').classList.remove('open');
+document.getElementById('msg-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+});
 
 window.takeCall = (id) => {
     update(ref(db, `calls/${id}`), {
