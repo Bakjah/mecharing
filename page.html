@@ -309,7 +309,6 @@
 <body>
 <div class="page">
 
-    <!-- ====== LOGIN ====== -->
     <div id="login-section">
         <div class="login-logo">⚙️</div>
         <div class="login-title">Mekanik Login</div>
@@ -329,7 +328,6 @@
         </div>
     </div>
 
-    <!-- ====== DASHBOARD ====== -->
     <div id="mechanic-section">
         <!-- Topbar -->
         <div class="topbar">
@@ -346,7 +344,6 @@
             </div>
         </div>
 
-        <!-- Stats -->
         <div class="stats">
             <div class="stat-card">
                 <div class="stat-label">Menunggu</div>
@@ -362,7 +359,6 @@
             </div>
         </div>
 
-        <!-- Online Members Panel -->
         <div class="online-panel">
             <div class="online-panel-hd">
                 <h3>👥 Mekanik Online</h3>
@@ -373,7 +369,6 @@
             </div>
         </div>
 
-        <!-- Alarm Banner -->
         <div id="alarm-banner">
             <div class="alarm-icon">🚨</div>
             <div class="alarm-text">
@@ -382,7 +377,6 @@
             </div>
         </div>
 
-        <!-- All Calls Table -->
         <div class="sec-hd">
             <h3>Semua Panggilan Aktif</h3>
             <span class="sec-badge red" id="active-badge">0 aktif</span>
@@ -403,7 +397,6 @@
             </div>
         </div>
 
-        <!-- My Active Calls -->
         <div class="sec-hd">
             <h3>Pesanan Saya</h3>
             <span class="sec-badge" id="my-badge">0 pesanan</span>
@@ -413,7 +406,6 @@
 
 </div>
 
-<!-- Message Popup Modal -->
 <div class="modal-overlay" id="msg-modal">
     <div class="modal-box">
         <div class="modal-label">📍 Detail Pesan / Lokasi</div>
@@ -462,7 +454,6 @@ function registerPresence() {
 
 let myName = '', myKey = '';
 
-// Cache users from Firebase
 let usersCache = {};
 onValue(ref(db, 'users'), snap => {
     usersCache = snap.val() || {};

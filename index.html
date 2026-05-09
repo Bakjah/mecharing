@@ -163,10 +163,9 @@
 </head>
 <body>
 <div class="wrap">
-    <!-- Header -->
     <div class="header">
         <div class="logo">🔧</div>
-        <h1>Auto <em>Juice</em><br>Jaya</h1>
+        <h1>Auto <em>Juice</em><br>Workshop</h1>
         <p class="subtitle">Pilih layanan dan kirim permintaan ke mekanik</p>
         <div class="badge">
             <div class="pulse"></div>
@@ -174,9 +173,7 @@
         </div>
     </div>
 
-    <!-- Form Card -->
     <div class="card">
-        <!-- Service type tabs -->
         <label style="margin-top:0;">Jenis Layanan</label>
         <div class="service-tabs">
             <button class="svc-tab" id="tab-repair" onclick="selectService('repair')">
@@ -190,13 +187,11 @@
             </button>
         </div>
 
-        <!-- Shared: Nama (all services) -->
         <div class="field-group" id="field-nama">
             <label>Nama Anda</label>
             <input type="text" id="input-nama" placeholder="Masukkan nama lengkap...">
         </div>
 
-        <!-- Tow only: No Telpon + Lokasi -->
         <div class="field-group" id="field-telp">
             <label>No. Telepon</label>
             <input type="tel" id="input-telp" placeholder="Contoh: 08123456789...">
@@ -206,7 +201,6 @@
             <input type="text" id="input-lokasi" placeholder="Contoh: Jl. Sudirman No.5, depan Indomaret...">
         </div>
 
-        <!-- Shared: Keterangan/Pesan (all services) -->
         <div class="field-group" id="field-pesan">
             <label id="pesan-label">Detail Masalah</label>
             <textarea id="input-pesan" placeholder="Jelaskan kondisi kendaraan Anda..."></textarea>
@@ -217,7 +211,6 @@
         </button>
     </div>
 
-    <!-- History -->
     <div class="section-hd">
         <h2>Riwayat Permintaan</h2>
         <span class="count-badge" id="call-count">0 permintaan</span>
@@ -259,7 +252,6 @@ window.selectService = (type) => {
     });
     document.getElementById('tab-' + type).className = 'svc-tab active-' + type;
 
-    // Always show: nama, pesan
     show('field-nama');
     show('field-pesan');
 
