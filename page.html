@@ -33,7 +33,6 @@
         .page { max-width: 960px; margin: 0 auto; }
         @keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:none } }
 
-        /* ====== LOGIN ====== */
         #login-section {
             max-width: 420px; margin: 60px auto 0;
             animation: fadeUp .5s ease both;
@@ -87,7 +86,6 @@
         .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
         .btn-primary:active { transform: scale(.98); }
 
-        /* ====== DASHBOARD ====== */
         #mechanic-section { display: none; animation: fadeUp .4s ease both; }
 
         .topbar {
@@ -105,7 +103,6 @@
         }
         .green-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success); }
 
-        /* Stats row */
         .stats {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
             margin-bottom: 24px;
@@ -120,7 +117,6 @@
         .stat-val.blue { color: var(--primary); }
         .stat-val.green { color: var(--success); }
 
-        /* Alarm banner */
         #alarm-banner {
             display: none;
             background: linear-gradient(135deg, rgba(239,68,68,.2), rgba(239,68,68,.05));
@@ -144,7 +140,6 @@
         .alarm-text strong { display: block; font-size: .95rem; font-weight: 600; color: var(--danger); }
         .alarm-text span { font-size: .82rem; color: var(--dim); }
 
-        /* Section header */
         .sec-hd {
             display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
         }
@@ -155,7 +150,6 @@
         }
         .sec-badge.red { background: rgba(239,68,68,.15); border-color: rgba(239,68,68,.3); color: var(--danger); }
 
-        /* Table */
         .tbl-wrap {
             background: var(--card); border: 1px solid var(--border);
             border-radius: 18px; overflow: hidden; margin-bottom: 24px;
@@ -203,7 +197,6 @@
 
         .empty-row td { text-align: center; padding: 40px; color: var(--dim); font-size: .88rem; }
 
-        /* My calls table */
         .my-call-item {
             background: var(--card2); border: 1px solid var(--border);
             border-radius: 12px; padding: 14px 16px;
@@ -237,7 +230,6 @@
 <body>
 <div class="page">
 
-    <!-- ====== LOGIN ====== -->
     <div id="login-section">
         <div class="login-logo">⚙️</div>
         <div class="login-title">Mekanik Login</div>
@@ -256,7 +248,6 @@
         </div>
     </div>
 
-    <!-- ====== DASHBOARD ====== -->
     <div id="mechanic-section">
         <!-- Topbar -->
         <div class="topbar">
@@ -320,7 +311,6 @@
             </div>
         </div>
 
-        <!-- My Active Calls -->
         <div class="sec-hd">
             <h3>Pesanan Saya</h3>
             <span class="sec-badge" id="my-badge">0 pesanan</span>
@@ -330,7 +320,6 @@
 
 </div>
 
-<!-- Alarm audio (beep via Web Audio API, no file needed) -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, remove, update, onValue, onDisconnect, push }
@@ -346,15 +335,12 @@ const firebaseConfig = {
     appId: "1:893072627803:web:5a6e93cdc36b8867f3877e"
 };
 const db = getDatabase(initializeApp(firebaseConfig));
-
-// ── Online counter (display only, presence registered after login) ──
 onValue(ref(db, 'online_users'), snap => {
     const c = snap.exists() ? Object.keys(snap.val()).length : 0;
     const el = document.getElementById('online-count');
     if (el) el.textContent = c;
 });
 
-// presence ref disimpan agar bisa dihapus saat logout
 let myPresenceRef = null;
 
 function registerPresence() {
@@ -367,11 +353,9 @@ function registerPresence() {
     });
 }
 
-// ── Login ──────────────────────────────────────────────────────
 const MASTER_HASH = "d295f3500f6895062de780b07f1c00f6ba84901dc109b3d87afb40978a799b35";
 let myName = '', myKey = '';
 
-// Load users dropdown
 onValue(ref(db, 'users'), snap => {
     const sel = document.getElementById('user-select');
     if (!sel) return;
@@ -405,7 +389,6 @@ document.getElementById('login-btn').onclick = async () => {
     update(userRef, { status: 'online' });
     onDisconnect(userRef).update({ status: 'offline' });
 
-    // Daftarkan presence HANYA setelah login berhasil
     registerPresence();
 
     document.getElementById('login-section').style.display = 'none';
@@ -414,12 +397,9 @@ document.getElementById('login-btn').onclick = async () => {
 
     startDashboard();
 
-    // Logout handler
     document.getElementById('logout-btn').onclick = async () => {
         if (!confirm('Yakin mau logout?')) return;
-        // Hapus presence manual
         if (myPresenceRef) await remove(myPresenceRef);
-        // Set status offline
         await update(ref(db, `users/${myKey}`), { status: 'offline' });
         localStorage.removeItem('mech_name');
         localStorage.removeItem('mech_key');
@@ -432,7 +412,6 @@ async function sha256(str) {
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-// ── Dashboard ──────────────────────────────────────────────────
 let prevWaitingCount = 0;
 let audioCtx = null;
 
@@ -470,14 +449,12 @@ function startDashboard() {
             return;
         }
 
-        // Filter active (non-Selesai)
         const active = Object.entries(data)
             .filter(([, c]) => c.status !== 'Selesai')
             .sort((a, b) => b[1].timestamp - a[1].timestamp);
 
         let waitingCount = 0, respondedCount = 0, myCalls = [];
 
-        // ── All Calls Table ──
         if (active.length === 0) {
             tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Semua panggilan sudah diselesaikan ✅</td></tr>';
         } else {
@@ -522,7 +499,6 @@ function startDashboard() {
             });
         }
 
-        // ── My Calls List ──
         if (myCalls.length === 0) {
             myList.innerHTML = '<div class="my-empty">Anda belum mengambil pesanan.</div>';
         } else {
@@ -559,7 +535,6 @@ function updateAlarm(waitingCount) {
         banner.classList.add('visible');
         document.getElementById('alarm-count').textContent =
             waitingCount + ' panggilan menunggu respons';
-        // Beep only when new calls arrive
         if (waitingCount > prevWaitingCount) beep();
     } else {
         banner.classList.remove('visible');
@@ -567,7 +542,6 @@ function updateAlarm(waitingCount) {
     prevWaitingCount = waitingCount;
 }
 
-// ── Global action handlers ─────────────────────────────────────
 window.takeCall = (id) => {
     update(ref(db, `calls/${id}`), {
         status: 'Direspon',
@@ -576,7 +550,6 @@ window.takeCall = (id) => {
 };
 
 window.finishCall = (id) => {
-    // Remove the call entirely from Firebase → disappears everywhere
     remove(ref(db, `calls/${id}`));
 };
 </script>

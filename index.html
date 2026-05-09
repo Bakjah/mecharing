@@ -186,13 +186,11 @@ const firebaseConfig = {
 };
 const db = getDatabase(initializeApp(firebaseConfig));
 
-// Online counter
 onValue(ref(db, 'online_users'), snap => {
     document.getElementById('online-count').textContent =
         snap.exists() ? Object.keys(snap.val()).length : 0;
 });
 
-// Broadcast
 document.getElementById('broadcast-btn').onclick = () => {
     const ta = document.getElementById('customer-msg');
     const msg = ta.value.trim();
@@ -215,7 +213,6 @@ document.getElementById('broadcast-btn').onclick = () => {
       .finally(() => { btn.disabled = false; btn.textContent = '🚨  PANGGIL SEMUA MEKANIK'; });
 };
 
-// Live history
 onValue(ref(db, 'calls'), snap => {
     const data = snap.val();
     const list = document.getElementById('call-list');
