@@ -252,6 +252,29 @@
         .my-call-finish:hover { filter: brightness(1.1); }
         .my-empty { color: var(--dim); font-size: .87rem; padding: 16px 0; }
 
+        /* Online members panel */
+        .online-panel {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 18px; padding: 18px 20px; margin-bottom: 24px;
+        }
+        .online-panel-hd {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .online-panel-hd h3 { font-family: 'Syne', sans-serif; font-size: .95rem; font-weight: 700; }
+        .members-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        .member-chip {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 6px 14px; border-radius: 999px; font-size: .8rem; font-weight: 600;
+            border: 1px solid;
+        }
+        .member-chip.online { background: rgba(16,185,129,.12); border-color: rgba(16,185,129,.3); color: var(--success); }
+        .member-chip.offline { background: var(--card2); border-color: var(--border); color: var(--dim); }
+        .member-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+        .member-chip.online .member-dot { background: var(--success); box-shadow: 0 0 6px var(--success); }
+        .member-chip.offline .member-dot { background: var(--dim); }
+        .no-members { color: var(--dim); font-size: .85rem; }
+
         @media (max-width: 640px) {
             .stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
             .stat-val { font-size: 1.3rem; }
@@ -271,7 +294,10 @@
             <label for="username-input">Username</label>
             <input type="text" id="username-input" placeholder="Masukkan username Anda..." autocomplete="off" autocapitalize="none">
 
-            <label class="mt" for="pin-input">PIN Akses</label>
+            <label class="mt" for="password-input">Password</label>
+            <input type="password" id="password-input" placeholder="Masukkan password...">
+
+            <label class="mt" for="pin-input">PIN Akses Mekanik</label>
             <input type="password" id="pin-input" placeholder="••••••">
 
             <button class="btn btn-primary" id="login-btn">MASUK DASHBOARD</button>
@@ -306,6 +332,16 @@
             <div class="stat-card">
                 <div class="stat-label">Online</div>
                 <div class="stat-val green" id="online-count">0</div>
+            </div>
+        </div>
+
+        <div class="online-panel">
+            <div class="online-panel-hd">
+                <h3>👥 Mekanik Online</h3>
+                <span class="sec-badge" id="online-count-badge">0 online</span>
+            </div>
+            <div class="members-grid" id="members-grid">
+                <span class="no-members">Memuat data...</span>
             </div>
         </div>
 
@@ -393,7 +429,6 @@ function registerPresence() {
     });
 }
 
-const MASTER_HASH = "d295f3500f6895062de780b07f1c00f6ba84901dc109b3d87afb40978a799b35";
 let myName = '', myKey = '';
 
 let usersCache = {};
@@ -403,41 +438,57 @@ onValue(ref(db, 'users'), snap => {
 
 function shakeInput(el) {
     el.classList.remove('input-error');
+    void el.offsetWidth; // reflow to restart animation
     el.classList.add('input-error');
     setTimeout(() => el.classList.remove('input-error'), 500);
 }
 
+const MECHANIC_PIN_HASH = "d295f3500f6895062de780b07f1c00f6ba84901dc109b3d87afb40978a799b35";
+
 document.getElementById('login-btn').onclick = async () => {
     const usernameEl = document.getElementById('username-input');
+    const passwordEl = document.getElementById('password-input');
     const pinEl      = document.getElementById('pin-input');
-    const typedName  = usernameEl.value.trim();
-    const pin        = pinEl.value;
+    const typedUser  = usernameEl.value.trim();
+    const typedPass  = passwordEl.value;
+    const typedPin   = pinEl.value;
 
-    if (!typedName) { shakeInput(usernameEl); usernameEl.focus(); return; }
-    if (!pin)       { shakeInput(pinEl); pinEl.focus(); return; }
+    if (!typedUser) { shakeInput(usernameEl); usernameEl.focus(); return; }
+    if (!typedPass) { shakeInput(passwordEl); passwordEl.focus(); return; }
+    if (!typedPin)  { shakeInput(pinEl); pinEl.focus(); return; }
 
     const matchedKey = Object.keys(usersCache).find(
-        k => usersCache[k].username.toLowerCase() === typedName.toLowerCase()
+        k => usersCache[k].username.toLowerCase() === typedUser.toLowerCase()
     );
     if (!matchedKey) {
         shakeInput(usernameEl);
-        usernameEl.focus();
         usernameEl.placeholder = '❌ Username tidak ditemukan!';
         setTimeout(() => usernameEl.placeholder = 'Masukkan username Anda...', 2000);
+        usernameEl.focus();
         return;
     }
 
-    const hash = await sha256(pin);
-    if (hash !== MASTER_HASH) {
+    const storedPassword = usersCache[matchedKey].password || '';
+    if (typedPass !== storedPassword) {
+        shakeInput(passwordEl);
+        passwordEl.value = '';
+        passwordEl.placeholder = '❌ Password salah!';
+        setTimeout(() => passwordEl.placeholder = 'Masukkan password...', 2000);
+        passwordEl.focus();
+        return;
+    }
+
+    const pinHash = await sha256(typedPin);
+    if (pinHash !== MECHANIC_PIN_HASH) {
         shakeInput(pinEl);
         pinEl.value = '';
-        pinEl.focus();
-        pinEl.placeholder = '❌ PIN salah!';
+        pinEl.placeholder = '❌ PIN Mekanik salah!';
         setTimeout(() => pinEl.placeholder = '••••••', 2000);
+        pinEl.focus();
         return;
     }
 
-    myName = usersCache[matchedKey].username;
+    myName = usersCache[matchedKey].displayName || usersCache[matchedKey].username;
     myKey  = matchedKey;
 
     localStorage.setItem('mech_name', myName);
@@ -451,13 +502,16 @@ document.getElementById('login-btn').onclick = async () => {
 
     document.getElementById('login-section').style.display = 'none';
     document.getElementById('mechanic-section').style.display = 'block';
-    document.getElementById('display-name').textContent = myName;
+    document.getElementById('display-name').textContent = myName; // displayName from Firebase
 
     startDashboard();
+    startMembersPanel();
 
     document.getElementById('logout-btn').onclick = async () => {
         if (!confirm('Yakin mau logout?')) return;
+        // Hapus presence manual
         if (myPresenceRef) await remove(myPresenceRef);
+        // Set status offline
         await update(ref(db, `users/${myKey}`), { status: 'offline' });
         localStorage.removeItem('mech_name');
         localStorage.removeItem('mech_key');
@@ -468,6 +522,34 @@ document.getElementById('login-btn').onclick = async () => {
 async function sha256(str) {
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function startMembersPanel() {
+    onValue(ref(db, 'users'), snap => {
+        const grid = document.getElementById('members-grid');
+        const badge = document.getElementById('online-count-badge');
+        const users = snap.val();
+        if (!users) { grid.innerHTML = '<span class="no-members">Tidak ada data.</span>'; return; }
+
+        const entries = Object.values(users);
+        const onlineCount = entries.filter(u => u.status === 'online').length;
+        badge.textContent = onlineCount + ' online';
+
+        entries.sort((a, b) => {
+            if (a.status === b.status) return (a.displayName || a.username).localeCompare(b.displayName || b.username);
+            return a.status === 'online' ? -1 : 1;
+        });
+
+        grid.innerHTML = '';
+        entries.forEach(u => {
+            const isOnline = u.status === 'online';
+            const name = u.displayName || u.username || '?';
+            const chip = document.createElement('div');
+            chip.className = 'member-chip ' + (isOnline ? 'online' : 'offline');
+            chip.innerHTML = `<span class="member-dot"></span>${name}`;
+            grid.appendChild(chip);
+        });
+    });
 }
 
 let prevWaitingCount = 0;
