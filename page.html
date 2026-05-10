@@ -309,6 +309,7 @@
 <body>
 <div class="page">
 
+    <!-- ====== LOGIN ====== -->
     <div id="login-section">
         <div class="login-logo">⚙️</div>
         <div class="login-title">Mekanik Login</div>
@@ -328,6 +329,7 @@
         </div>
     </div>
 
+    <!-- ====== DASHBOARD ====== -->
     <div id="mechanic-section">
         <!-- Topbar -->
         <div class="topbar">
@@ -344,6 +346,7 @@
             </div>
         </div>
 
+        <!-- Stats -->
         <div class="stats">
             <div class="stat-card">
                 <div class="stat-label">Menunggu</div>
@@ -359,6 +362,7 @@
             </div>
         </div>
 
+        <!-- Online Members Panel -->
         <div class="online-panel">
             <div class="online-panel-hd">
                 <h3>👥 Mekanik Online</h3>
@@ -369,6 +373,7 @@
             </div>
         </div>
 
+        <!-- Alarm Banner -->
         <div id="alarm-banner">
             <div class="alarm-icon">🚨</div>
             <div class="alarm-text">
@@ -377,6 +382,7 @@
             </div>
         </div>
 
+        <!-- All Calls Table -->
         <div class="sec-hd">
             <h3>Semua Panggilan Aktif</h3>
             <span class="sec-badge red" id="active-badge">0 aktif</span>
@@ -390,6 +396,7 @@
                             <th>Waktu</th>
                             <th>Pesan / Lokasi</th>
                             <th>Status</th>
+                            <th style="white-space:nowrap;">⏱ Sisa Waktu</th>
                         </tr>
                     </thead>
                     <tbody id="call-table-body"></tbody>
@@ -397,6 +404,7 @@
             </div>
         </div>
 
+        <!-- My Active Calls -->
         <div class="sec-hd">
             <h3>Pesanan Saya</h3>
             <span class="sec-badge" id="my-badge">0 pesanan</span>
@@ -406,6 +414,7 @@
 
 </div>
 
+<!-- Message Popup Modal -->
 <div class="modal-overlay" id="msg-modal">
     <div class="modal-box">
         <div class="modal-label">📍 Detail Pesan / Lokasi</div>
@@ -525,14 +534,17 @@ document.getElementById('login-btn').onclick = async () => {
 
     document.getElementById('login-section').style.display = 'none';
     document.getElementById('mechanic-section').style.display = 'block';
-    document.getElementById('display-name').textContent = myName;
+    document.getElementById('display-name').textContent = myName; // displayName from Firebase
 
     startDashboard();
     startMembersPanel();
+    startExpiryWatcher();
 
     document.getElementById('logout-btn').onclick = async () => {
         if (!confirm('Yakin mau logout?')) return;
+        // Hapus presence manual
         if (myPresenceRef) await remove(myPresenceRef);
+        // Set status offline
         await update(ref(db, `users/${myKey}`), { status: 'offline' });
         localStorage.removeItem('mech_name');
         localStorage.removeItem('mech_key');
@@ -571,6 +583,35 @@ function startMembersPanel() {
             grid.appendChild(chip);
         });
     });
+}
+
+const EXPIRY_MS = 30 * 60 * 1000;
+
+function startExpiryWatcher() {
+    checkExpiredCalls();
+    setInterval(checkExpiredCalls, 60 * 1000);
+}
+
+async function checkExpiredCalls() {
+    const { get } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js");
+    const snap = await get(ref(db, 'calls'));
+    if (!snap.exists()) return;
+    const now  = Date.now();
+    const data = snap.val();
+    Object.entries(data).forEach(([id, call]) => {
+        const ts = call.timestamp || parseInt(id);
+        if (now - ts >= EXPIRY_MS) {
+            remove(ref(db, `calls/${id}`));
+        }
+    });
+}
+
+function timeLeft(timestamp) {
+    const ms = EXPIRY_MS - (Date.now() - (timestamp || 0));
+    if (ms <= 0) return 'Kedaluwarsa';
+    const m = Math.floor(ms / 60000);
+    const s = Math.floor((ms % 60000) / 1000);
+    return `${m}m ${s}s`;
 }
 
 let prevWaitingCount = 0;
@@ -660,6 +701,7 @@ function startDashboard() {
                         ${progressInfo}
                         ${takeBtn}
                     </td>
+                    <td id="countdown-${id}" style="font-size:.78rem;color:var(--dim);white-space:nowrap;font-weight:600;"></td>
                 `;
                 tr.querySelector('.msg-cell').addEventListener('click', () => openMsgModal(call));
                 tbody.appendChild(tr);
@@ -696,6 +738,29 @@ function startDashboard() {
         document.getElementById('my-badge').textContent = myCalls.length + ' pesanan';
         document.getElementById('active-badge').textContent = active.length + ' aktif';
         const iHaveActiveCall = myCalls.length > 0;
+
+        if (window._countdownTimer) clearInterval(window._countdownTimer);
+        window._countdownTimer = setInterval(() => {
+            if (!snap.exists()) return;
+            const d2 = snap.val(); // snap is captured in closure; use stored timestamps
+            active.forEach(([id, call]) => {
+                const el = document.getElementById('countdown-' + id);
+                if (!el) return;
+                const ts  = call.timestamp || parseInt(id);
+                const ms  = EXPIRY_MS - (Date.now() - ts);
+                if (ms <= 0) {
+                    el.textContent = 'Kedaluwarsa';
+                    el.style.color = 'var(--danger)';
+                    return;
+                }
+                const m = Math.floor(ms / 60000);
+                const s = Math.floor((ms % 60000) / 1000);
+                const pct = ms / EXPIRY_MS;
+                el.textContent = `${m}m ${String(s).padStart(2,'0')}s`;
+                el.style.color = pct < 0.2 ? 'var(--danger)' : pct < 0.5 ? 'var(--warn)' : 'var(--dim)';
+            });
+        }, 1000);
+
         updateStats(waitingCount, respondedCount);
         updateAlarm(waitingCount, iHaveActiveCall);
     });
@@ -720,7 +785,7 @@ function startAlarmLoop() {
             return;
         }
         beep();
-    }, 8000); 
+    }, 8000);
 }
 
 function stopAlarmLoop() {
@@ -731,7 +796,6 @@ function stopAlarmLoop() {
 function updateAlarm(waitingCount, iHaveActiveCall) {
     const banner = document.getElementById('alarm-banner');
     if (waitingCount > 0 && !iHaveActiveCall) {
-        // Show banner
         banner.classList.add('visible');
         document.getElementById('alarm-count').textContent =
             waitingCount + ' panggilan menunggu respons';

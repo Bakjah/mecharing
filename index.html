@@ -163,9 +163,10 @@
 </head>
 <body>
 <div class="wrap">
+    <!-- Header -->
     <div class="header">
         <div class="logo">🔧</div>
-        <h1>Auto <em>Juice</em><br>Workshop</h1>
+        <h1>Auto <em>Juice</em><br>Jaya</h1>
         <p class="subtitle">Pilih layanan dan kirim permintaan ke mekanik</p>
         <div class="badge">
             <div class="pulse"></div>
@@ -173,7 +174,9 @@
         </div>
     </div>
 
+    <!-- Form Card -->
     <div class="card">
+        <!-- Service type tabs -->
         <label style="margin-top:0;">Jenis Layanan</label>
         <div class="service-tabs">
             <button class="svc-tab" id="tab-repair" onclick="selectService('repair')">
@@ -187,20 +190,23 @@
             </button>
         </div>
 
+        <!-- Shared: Nama (all services) -->
         <div class="field-group" id="field-nama">
             <label>Nama Anda</label>
             <input type="text" id="input-nama" placeholder="Masukkan nama lengkap...">
         </div>
 
+        <!-- Tow only: No Telpon + Lokasi -->
         <div class="field-group" id="field-telp">
             <label>No. Telepon</label>
-            <input type="tel" id="input-telp" placeholder="Contoh: 8464342...">
+            <input type="tel" id="input-telp" placeholder="Contoh: 08123456789...">
         </div>
         <div class="field-group" id="field-lokasi">
             <label>Lokasi Anda</label>
-            <input type="text" id="input-lokasi" placeholder="Contoh: Jl. Hawick, depan PBH...">
+            <input type="text" id="input-lokasi" placeholder="Contoh: Jl. Sudirman No.5, depan Indomaret...">
         </div>
 
+        <!-- Shared: Keterangan/Pesan (all services) -->
         <div class="field-group" id="field-pesan">
             <label id="pesan-label">Detail Masalah</label>
             <textarea id="input-pesan" placeholder="Jelaskan kondisi kendaraan Anda..."></textarea>
@@ -211,6 +217,7 @@
         </button>
     </div>
 
+    <!-- History -->
     <div class="section-hd">
         <h2>Riwayat Permintaan</h2>
         <span class="count-badge" id="call-count">0 permintaan</span>
@@ -223,7 +230,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, onValue }
+import { getDatabase, ref, set, get, remove, onValue }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -236,6 +243,26 @@ const firebaseConfig = {
     appId: "1:893072627803:web:5a6e93cdc36b8867f3877e"
 };
 const db = getDatabase(initializeApp(firebaseConfig));
+
+const EXPIRY_MS_IDX = 30 * 60 * 1000; // change here to adjust (e.g. 1 * 60 * 1000)
+
+async function checkAndRemoveExpired() {
+    try {
+        const snap = await get(ref(db, 'calls'));
+        if (!snap.exists()) return;
+        const now  = Date.now();
+        const data = snap.val();
+        Object.entries(data).forEach(([id, call]) => {
+            const ts = call.timestamp || parseInt(id);
+            if (now - ts >= EXPIRY_MS_IDX) {
+                remove(ref(db, `calls/${id}`));
+            }
+        });
+    } catch(e) {}
+}
+
+checkAndRemoveExpired();
+setInterval(checkAndRemoveExpired, 30 * 1000);
 
 onValue(ref(db, 'online_users'), snap => {
     document.getElementById('online-count').textContent =
@@ -327,7 +354,7 @@ window.sendRequest = () => {
     }).catch(e => showToast('❌ Gagal: ' + e.message))
       .finally(() => {
           btn.disabled = false;
-          window.selectService(currentService); // restore button label
+          window.selectService(currentService);
       });
 };
 
@@ -359,6 +386,16 @@ onValue(ref(db, 'calls'), snap => {
             mainLine = `${call.nama || ''} · ${call.detail || call.message || ''}`;
         }
 
+        const EXPIRY_MS   = EXPIRY_MS_IDX;
+        const ts          = call.timestamp || 0;
+        const msLeft      = EXPIRY_MS - (Date.now() - ts);
+        const isExpiring  = msLeft > 0 && msLeft < 5 * 60 * 1000;
+        let expiryLine    = '';
+        if (!isDone && msLeft > 0) {
+            const mLeft = Math.floor(msLeft / 60000);
+            expiryLine = `<span style="font-size:.68rem;color:${isExpiring ? '#ef4444' : '#9ca3af'};">⏱ Hapus otomatis dalam ${mLeft} menit</span>`;
+        }
+
         const d = document.createElement('div');
         d.className = 'call-item' + (isDone ? ' done' : '');
         d.innerHTML = `
@@ -370,6 +407,7 @@ onValue(ref(db, 'calls'), snap => {
                     <span class="sdot ${isDone?'d':isResp?'r':'w'}"></span>
                     <span>${statusTxt}</span>
                     <span>· ${call.time}</span>
+                    ${expiryLine}
                 </div>
             </div>`;
         list.appendChild(d);
