@@ -7,158 +7,221 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #0a0f1e;
-            --card: #111827;
-            --card2: #1a2235;
-            --border: #1f2d45;
-            --primary: #3b82f6;
-            --danger: #ef4444;
-            --success: #10b981;
-            --warn: #f59e0b;
-            --text: #f1f5f9;
-            --dim: #64748b;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background: var(--bg); color: var(--text);
-            font-family: 'DM Sans', sans-serif;
-            min-height: 100vh; display: flex;
-            align-items: flex-start; justify-content: center;
-            padding: 32px 20px 60px;
-            background-image:
-                radial-gradient(ellipse at 15% 10%, rgba(59,130,246,0.07) 0%, transparent 55%),
-                radial-gradient(ellipse at 85% 85%, rgba(239,68,68,0.06) 0%, transparent 55%);
-        }
-        .wrap { width: 100%; max-width: 480px; animation: fadeUp .5s ease both; }
-        @keyframes fadeUp { from { opacity:0; transform:translateY(18px) } to { opacity:1; transform:none } }
+        /* --- Root Variables --- */
+:root {
+    --primary: #4172f3;
+    --juice-yellow: #facc15; 
+    --primary-light: #eff6ff;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warn: #f59e0b;
+    --bg-body: #f1f5f9;
+    --bg-card: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --radius: 16px;
+}
 
-        /* Header */
-        .header { text-align: center; margin-bottom: 28px; }
-        .logo {
-            width: 68px; height: 68px;
-            background: linear-gradient(135deg, #ef4444, #b91c1c);
-            border-radius: 22px; display: flex; align-items: center;
-            justify-content: center; font-size: 30px; margin: 0 auto 18px;
-            box-shadow: 0 8px 32px rgba(239,68,68,0.35);
-        }
-        h1 { font-family: 'Syne', sans-serif; font-size: 1.85rem; font-weight: 800; letter-spacing: -1px; line-height: 1.15; }
-        h1 em { color: var(--danger); font-style: normal; }
-        .subtitle { margin-top: 8px; color: var(--dim); font-size: 0.88rem; }
-        .badge {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: rgba(16,185,129,.1); border: 1px solid rgba(16,185,129,.25);
-            padding: 5px 14px; border-radius: 999px; font-size: .8rem;
-            color: var(--success); margin-top: 12px; font-weight: 600;
-        }
-        .pulse { width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: pulse 1.6s ease infinite; }
-        @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.5)} 50%{box-shadow:0 0 0 7px rgba(16,185,129,0)} }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* Card */
-        .card {
-            background: var(--card); border: 1px solid var(--border);
-            border-radius: 20px; padding: 22px;
-            box-shadow: 0 20px 60px rgba(0,0,0,.5); margin-bottom: 20px;
-        }
-        label {
-            display: block; font-size: .76rem; font-weight: 600;
-            text-transform: uppercase; letter-spacing: .07em;
-            color: var(--dim); margin-bottom: 8px; margin-top: 14px;
-        }
-        label:first-child { margin-top: 0; }
-        .field-group label { margin-top: 0; margin-bottom: 6px; }
-        input[type="text"], input[type="tel"], textarea {
-            width: 100%; background: var(--bg); border: 1px solid var(--border);
-            border-radius: 12px; padding: 13px 16px; color: var(--text);
-            font-family: 'DM Sans', sans-serif; font-size: .95rem;
-            transition: border-color .2s, box-shadow .2s;
-        }
-        input[type="text"]:focus, input[type="tel"]:focus, textarea:focus {
-            outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,.15);
-        }
-        input::placeholder, textarea::placeholder { color: var(--dim); }
-        textarea { height: 110px; resize: none; display: block; }
+body {
+    background-color: var(--bg-body);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-main);
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
 
-        /* Service Type Selector */
-        .service-tabs {
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: 8px; margin-bottom: 18px;
-        }
-        .svc-tab {
-            padding: 12px 8px; border: 1px solid var(--border);
-            border-radius: 14px; background: var(--bg);
-            color: var(--dim); font-family: 'DM Sans', sans-serif;
-            font-size: .78rem; font-weight: 600; cursor: pointer;
-            text-align: center; transition: all .2s; line-height: 1.3;
-        }
-        .svc-tab .tab-icon { font-size: 20px; display: block; margin-bottom: 5px; }
-        .svc-tab:hover { border-color: var(--primary); color: var(--text); }
-        .svc-tab.active { background: rgba(59,130,246,.15); border-color: var(--primary); color: var(--primary); }
-        .svc-tab.active-tow { background: rgba(245,158,11,.12); border-color: var(--warn); color: var(--warn); }
-        .svc-tab.active-repair { background: rgba(59,130,246,.12); border-color: var(--primary); color: var(--primary); }
-        .svc-tab.active-modif { background: rgba(16,185,129,.12); border-color: var(--success); color: var(--success); }
+/* --- Layout Grid --- */
+.wrap {
+    display: grid;
+    grid-template-columns: 1fr 380px; 
+    grid-template-rows: auto 680px; /* Ditambah dikit tingginya biar lega */
+    gap: 30px;
+    max-width: 1150px;
+    width: 100%;
+    align-items: start;
+}
 
-        /* Form fields animated */
-        .form-fields { display: flex; flex-direction: column; gap: 0; }
-        .field-group { overflow: hidden; max-height: 0; opacity: 0; transition: max-height .4s ease, opacity .3s ease; }
-        .field-group.show { max-height: 400px; opacity: 1; }
-        .field-group label { margin-top: 18px; margin-bottom: 8px; }
-        .field-group:first-of-type label { margin-top: 16px; }
-        .field-group input { margin-bottom: 0; }
-        .field-group textarea { margin-bottom: 0; }
+/* --- Header Section (Center) --- */
+.header { 
+    grid-column: 1 / span 2;
+    text-align: center;
+    margin-bottom: 20px;
+}
 
-        /* Send button */
-        .send-btn {
-            width: 100%; padding: 16px; border: none; border-radius: 14px;
-            font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800;
-            letter-spacing: 1.5px; cursor: pointer;
-            transition: filter .2s, transform .15s; margin-top: 16px;
-        }
-        .send-btn { margin-top: 20px; }
-        .send-btn.tow { background: linear-gradient(135deg, var(--warn), #d97706); color: white; box-shadow: 0 8px 24px rgba(245,158,11,.3); }
-        .send-btn.default { background: linear-gradient(135deg, var(--danger), #b91c1c); color: white; box-shadow: 0 8px 24px rgba(239,68,68,.3); }
-        .send-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
-        .send-btn:active { transform: scale(.98); }
-        .send-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+h1 { font-size: 2.2rem; font-weight: 900; color: #0f172a; text-transform: uppercase; }
+h1 em { color: var(--juice-yellow); font-style: normal; }
 
-        /* History */
-        .section-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-        .section-hd h2 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
-        .count-badge { background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 3px 12px; font-size: .75rem; color: var(--dim); }
+/* Mekanik Online Green Style */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    background: #ecfdf5; 
+    color: #059669; 
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    margin-top: 10px;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
 
-        .call-list { display: flex; flex-direction: column; gap: 10px; }
-        .call-item {
-            background: var(--card); border: 1px solid var(--border);
-            border-radius: 14px; padding: 13px 15px;
-            display: flex; align-items: flex-start; gap: 12px; animation: fadeUp .3s ease both;
-        }
-        .call-item.done { opacity: .4; }
-        .call-icon { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; margin-top: 1px; }
-        .call-icon.w  { background: rgba(239,68,68,.15); }
-        .call-icon.r  { background: rgba(59,130,246,.15); }
-        .call-icon.d  { background: rgba(16,185,129,.15); }
-        .call-icon.tw { background: rgba(245,158,11,.15); }
-        .call-body { flex: 1; min-width: 0; }
-        .call-type-badge { display: inline-block; font-size: .68rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .04em; }
-        .call-type-badge.tow    { background: rgba(245,158,11,.15); color: var(--warn); }
-        .call-type-badge.repair { background: rgba(59,130,246,.15); color: var(--primary); }
-        .call-type-badge.modif  { background: rgba(16,185,129,.15); color: var(--success); }
-        .call-msg  { font-size: .87rem; font-weight: 500; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .call-meta { font-size: .73rem; color: var(--dim); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        .sdot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-        .sdot.w { background: var(--danger); }
-        .sdot.r { background: var(--primary); }
-        .sdot.d { background: var(--success); }
+.pulse {
+    width: 9px; height: 9px;
+    background: #10b981; 
+    border-radius: 50%;
+    margin-right: 8px;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    animation: pulse-green 2s infinite;
+}
 
-        .empty { text-align: center; padding: 28px; color: var(--dim); font-size: .87rem; }
-        .toast {
-            position: fixed; bottom: 20px; left: 50%;
-            transform: translateX(-50%) translateY(80px);
-            background: var(--card2); border: 1px solid var(--border);
-            border-radius: 12px; padding: 11px 20px; font-size: .87rem;
-            transition: transform .35s cubic-bezier(.34,1.56,.64,1); z-index: 999; white-space: nowrap;
-        }
-        .toast.show { transform: translateX(-50%) translateY(0); }
+@keyframes pulse-green {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* --- Form Card (Kiri) --- */
+.card {
+    grid-column: 1; 
+    grid-row: 2;
+    background: var(--bg-card);
+    padding: 30px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    height: 100%;
+    overflow-y: auto; /* Agar tombol bisa di-scroll kalau layar sempit */
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Riwayat Section (Kanan) --- */
+.section-hd {
+    grid-column: 2; 
+    grid-row: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    position: relative;
+    top: -45px; 
+    padding: 0 5px;
+}
+
+.call-list {
+    grid-column: 2; 
+    grid-row: 2;
+    background: rgba(255, 255, 255, 0.5);
+    border: 2px dashed #cbd5e1;
+    border-radius: var(--radius);
+    padding: 15px;
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* --- Item Riwayat & Auto-Enter --- */
+.call-item {
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    gap: 12px;
+    border: 1px solid var(--border);
+    border-left: 5px solid var(--primary);
+}
+
+.call-meta span[style*="font-size:.68rem"] {
+    display: block !important; 
+    margin-top: 8px;
+    padding-top: 5px;
+    border-top: 1px solid #f1f5f9;
+}
+
+/* --- Form Elements --- */
+.service-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.svc-tab {
+    background: #fff;
+    border: 1px solid var(--border);
+    padding: 12px 5px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+.svc-tab.active-repair { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+.svc-tab.active-modif { border-color: var(--success); color: var(--success); background: #f0fdf4; }
+.svc-tab.active-tow { border-color: var(--warn); color: var(--warn); background: #fffbeb; }
+
+/* Pastikan group input muncul */
+.field-group { display: none; }
+.field-group.show { display: block; }
+
+input, textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #f8fafc;
+    margin-bottom: 15px;
+    font-family: inherit;
+}
+
+/* --- TOMBOL KIRIM (FIXED HIDE ISSUE) --- */
+.send-btn {
+    display: block !important; /* Memaksa muncul */
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    margin-top: auto; /* Menaruh tombol di paling bawah box */
+    min-height: 55px;
+}
+
+.send-btn.default { background: #1e293b; color: white; }
+.send-btn.tow { background: linear-gradient(135deg, var(--warn), #d97706); color: white; }
+
+/* --- Toast --- */
+#toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #1e293b;
+    color: #fff;
+    padding: 16px 24px;
+    border-radius: 12px;
+    z-index: 9999;
+    transform: translateX(150%);
+    transition: 0.4s;
+    border-left: 5px solid var(--juice-yellow);
+}
+#toast.show { transform: translateX(0); }
+
+/* --- Responsive --- */
+@media (max-width: 1000px) {
+    .wrap { grid-template-columns: 1fr; grid-template-rows: auto; }
+    .header, .card, .section-hd, .call-list { grid-column: 1; }
+    .section-hd { top: 0; margin-top: 20px; }
+    .card { height: auto; min-height: 500px; }
+    .call-list { height: 400px; }
+}
     </style>
 </head>
 <body>
